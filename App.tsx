@@ -2667,11 +2667,11 @@ ${componentLogic}
               module={activeModule} 
               topic={topic} 
               paperDesign={paperDesign}
-              mcqStyle={activeThemeId === 3 ? 12 : mcqStyle}
+              mcqStyle={activeThemeId === '3' ? 12 : mcqStyle}
               instructionStyle={instructionStyle}
               isColorfulBackgroundEnabled={isColorfulBackgroundEnabled}
-              isInstructionBackgroundEnabled={activeThemeId === 1 || activeThemeId === 5 ? false : isInstructionBackgroundEnabled}
-              globalLayout={activeThemeId === 1 || activeThemeId === 5 ? 0 : globalLayout}
+              isInstructionBackgroundEnabled={activeThemeId === '1' || activeThemeId === '5' ? false : isInstructionBackgroundEnabled}
+              globalLayout={activeThemeId === '1' || activeThemeId === '5' ? 0 : globalLayout}
               baseLayout={baseLayout}
               instructionRulerStyle={instructionRulerStyle}
               zoom={previewZoom}
