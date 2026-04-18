@@ -200,7 +200,7 @@ const CollapsibleSection: React.FC<{
   children: React.ReactNode;
   rightElement?: React.ReactNode;
 }> = ({ title, subtitle, icon, iconBg, iconColor, isCollapsed, onToggle, children, rightElement }) => (
-  <div className="space-y-6">
+  <div className="space-y-4">
     <div className="flex items-center justify-between group cursor-pointer" onClick={onToggle}>
       <div className="flex items-center gap-4">
         <div className={`h-10 w-10 ${iconBg} rounded-2xl flex items-center justify-center ${iconColor} transition-transform duration-300 ${isCollapsed ? '' : 'rotate-12'}`}>
@@ -3519,15 +3519,15 @@ ${componentLogic}
                               {['A', 'B', 'C', 'D'].map(opt => (
                                 <div key={opt} className="text-[7px] text-slate-500 flex items-center gap-1">
                                   <span className={
-                                    mcqStyle === 1 ? 'w-5 h-5 flex items-center justify-center rounded-full border border-slate-300' : 
-                                    mcqStyle === 2 ? 'w-5 h-5 flex items-center justify-center border border-slate-300' : 
+                                    mcqStyle === 1 ? 'w-5 h-5 flex items-center justify-center rounded-full border border-slate-300 pb-1 leading-none bg-white' : 
+                                    mcqStyle === 2 ? 'w-5 h-5 flex items-center justify-center border border-slate-300 pb-1 leading-none bg-white' : 
                                     mcqStyle === 3 ? '('+opt+')' : 
                                     mcqStyle === 4 ? 'underline' : 
                                     mcqStyle === 5 ? 'font-bold' : 
-                                    mcqStyle === 6 ? 'rotate-45 w-5 h-5 flex items-center justify-center border border-slate-300 inline-block' :
+                                    mcqStyle === 6 ? 'rotate-45 w-5 h-5 flex items-center justify-center border border-slate-300 inline-block pb-1 leading-none bg-white' :
                                     mcqStyle === 7 ? '['+opt+']' :
-                                    mcqStyle === 8 ? 'w-5 h-5 flex items-center justify-center rounded-full bg-slate-900 text-white' :
-                                    mcqStyle === 9 ? 'w-5 h-5 flex items-center justify-center bg-slate-900 text-white' :
+                                    mcqStyle === 8 ? 'w-5 h-5 flex items-center justify-center rounded-full bg-slate-900 text-white pb-1 leading-none' :
+                                    mcqStyle === 9 ? 'w-5 h-5 flex items-center justify-center bg-slate-900 text-white pb-1 leading-none' :
                                     mcqStyle === 10 ? '(('+opt+'))' :
                                     mcqStyle === 15 ? 'rounded-[50%_50%_50%_50%_/_60%_60%_40%_40%] border-2 border-purple-600 px-2' :
                                     ''
@@ -5634,10 +5634,10 @@ ${componentLogic}
       {showSettings && (
         <div className={`fixed inset-0 z-[250] bg-slate-950/80 backdrop-blur-2xl flex items-center justify-center ${isSettingsFullScreen ? 'p-0' : 'p-4'}`}>
           <div className={`bg-[#f8fafc] bg-[radial-gradient(circle_at_top_right,rgba(234,88,12,0.03),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.03),transparent_40%)] overflow-hidden shadow-2xl flex flex-col border border-white/50 transition-all duration-500 ${isSettingsFullScreen ? 'w-full h-full rounded-none' : 'rounded-[48px] lg:rounded-[64px] w-full max-w-4xl h-full max-h-[75vh]'}`}>
-             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'hidden' : 'p-8 lg:p-12 pb-4'} flex justify-between items-center`}>
+             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'hidden' : 'p-4 lg:p-6 pb-2'} flex justify-between items-center`}>
                <div className="flex items-center gap-4">
-                 <div className="h-4 w-4 bg-orange-600 rounded-full animate-pulse"></div>
-                 <h2 className="text-[12px] font-black uppercase text-slate-900 tracking-widest">Workspace Control Node</h2>
+                 <div className="h-3 w-3 bg-orange-600 rounded-full animate-pulse"></div>
+                 <h2 className="text-[11px] font-black uppercase text-slate-900 tracking-widest">Workspace Control Node</h2>
                </div>
                <div className="flex items-center gap-3">
                  <button 
@@ -5650,7 +5650,7 @@ ${componentLogic}
                  <button onClick={() => setShowSettings(false)} className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900"><i className="fa-solid fa-xmark text-xl"></i></button>
                </div>
              </div>
-             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'fixed top-2 left-4 z-[300]' : 'px-6 lg:px-12 mb-8'}`}>
+             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'fixed top-2 left-4 z-[300]' : 'px-4 lg:px-8 mb-2'}`}>
                <div className={`flex bg-slate-100/70 p-1 rounded-[32px] gap-1 overflow-x-auto no-scrollbar shadow-inner ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'scale-75 origin-left opacity-50 hover:opacity-100 transition-opacity' : ''}`}>
                  {['COMMAND', 'ACCOUNT', 'ENGINE', 'BACKBONE LOGIC', 'DESIGN', 'FORMAT_DESIGN', 'BACKGROUND', 'LOGO'].map(tab => (
                    <button 
@@ -5671,7 +5671,7 @@ ${componentLogic}
                  <i className="fa-solid fa-xmark text-xl"></i>
                </button>
              )}
-             <div className={`flex-1 overflow-y-auto ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'px-2 pb-2' : 'px-6 lg:px-12 pb-12'} space-y-12 no-scrollbar`}>
+             <div className={`flex-1 overflow-y-auto ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'px-2 pb-2' : 'px-4 lg:px-8 pb-8'} space-y-6 no-scrollbar`}>
                 {settingsTab === 'FORMAT_DESIGN' && (
                   <div className="h-full min-h-[600px] animate-in fade-in slide-in-from-bottom-6">
                     <FormatDesignEditor 
@@ -5972,7 +5972,7 @@ ${componentLogic}
                   </div>
                 )}
                 {settingsTab === 'COMMAND' && (
-                   <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6">
+                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-6">
                      <div className="flex justify-between items-center px-2"><h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Instruction Templates</h3><button onClick={addTemplate} className="text-[11px] font-black text-orange-600 uppercase border-b-2 border-orange-600">+ New Part</button></div>
                      <div className="flex bg-slate-100/50 p-1.5 rounded-[24px] gap-1 overflow-x-auto no-scrollbar shadow-sm border border-slate-100 self-start">{['GRAMMAR', 'VOCABULARY', 'READING', 'GENERALS', 'TABLES', 'KIDS'].map(cat => (<button key={cat} onClick={() => setActiveTemplateCategory(cat)} className={`px-6 py-2.5 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all ${activeTemplateCategory === cat ? 'bg-orange-600 text-white shadow-md' : 'text-slate-400 hover:text-slate-600'}`}>{cat}</button>))}</div>
                      <div className="space-y-3">

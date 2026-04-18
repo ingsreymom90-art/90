@@ -48,27 +48,31 @@ body {
 
 /* MCQ Letter Refinements */
 .options-table b, .options-table .mcq-letter {
-    font-size: 10pt !important;
-    font-weight: 600 !important;
+    font-size: 10.5pt !important;
+    font-weight: 700 !important;
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    width: 18pt !important;
-    height: 18pt !important;
-    min-width: 18pt !important;
-    min-height: 18pt !important;
-    border: 0.8pt solid black !important;
+    width: 19pt !important;
+    height: 19pt !important;
+    min-width: 19pt !important;
+    min-height: 19pt !important;
+    border: 1.2pt solid black !important;
     border-radius: 50% !important;
-    margin: 0 4pt 0 0 !important;
-    background: transparent !important;
-    background-color: transparent !important;
+    margin: 0 6pt 0 0 !important;
+    background: white !important;
+    background-color: white !important;
     padding: 0 !important;
     color: black !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    line-height: normal !important;
+    line-height: 1 !important;
     outline: none !important;
     text-decoration: none !important;
+    transform: translateY(-0.8pt) !important; /* Lift letters slightly */
+    -webkit-print-color-adjust: exact;
+    overflow: hidden !important;
+    box-shadow: none !important;
 }
 
 .glass-panel {
