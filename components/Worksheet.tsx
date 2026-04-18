@@ -617,15 +617,16 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.1em;
-              height: 1.1em;
+              width: 0.85em;
+              height: 0.85em;
               background: transparent;
               border-radius: 50% !important;
               border: 0.5pt solid #cbd5e1;
-              font-size: 0.6em;
+              font-size: 0.5em;
               color: inherit;
               font-weight: 700 !important;
-              margin-right: 0.25em;
+              margin-right: 0.2em;
+              vertical-align: middle;
             }
           ` : ''}
  
@@ -639,10 +640,11 @@ const Worksheet: React.FC<WorksheetProps> = ({
               border-radius: 1px !important;
               background: transparent;
               color: inherit;
-              width: 1.1em;
-              height: 1.1em;
-              font-size: 0.6em;
-              margin-right: 0.25em;
+              width: 0.85em;
+              height: 0.85em;
+              font-size: 0.5em;
+              margin-right: 0.2em;
+              vertical-align: middle;
             }
           ` : ''}
 
