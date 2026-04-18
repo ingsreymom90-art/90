@@ -617,24 +617,35 @@ const Worksheet: React.FC<WorksheetProps> = ({
             
             /* Default if no design class matches */
             .worksheet-page:not([class*="design-"]) b, .worksheet-page:not([class*="design-"]) strong {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 1.4em;
+              height: 1.4em;
               background: transparent;
               border-radius: 50% !important;
               border: 0.5pt solid #cbd5e1;
-              font-size: 0.9em;
+              font-size: 0.85em;
               color: inherit;
               font-weight: 700 !important;
+              margin-right: 0.3em;
             }
           ` : ''}
 
-          /* MCQ Style 2: Boxed Letters */
+          /* MCQ Style 2: Boxed Letters - REFINED */
           ${mcqStyle === 2 ? `
             .prose b, .prose strong {
-              border: 1pt solid #475569;
-              border-radius: 4px !important;
-              background: #f8fafc;
-              color: #1e293b;
-              padding: 0 4px;
-              min-width: 1.4em;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              border: 0.75pt solid #475569;
+              border-radius: 2px !important;
+              background: transparent;
+              color: inherit;
+              width: 1.4em;
+              height: 1.4em;
+              font-size: 0.85em;
+              margin-right: 0.3em;
             }
           ` : ''}
 

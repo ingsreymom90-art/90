@@ -358,31 +358,34 @@ export const exportToWord = (
 
         if (mcqStyle === 1 || mcqStyle === 15) {
           // Both Round (1) and Crocodile Egg (15) use VML to ensure circles stay circles in Word.
-          // Crocodile Egg just happens to trigger the playful/modern colors naturally.
           if (mcqStyle === 15 && isColorExportEnabled) {
             borderColor = '#059669';
             bgColor = '#ecfdf5';
             textColor = '#059669';
             isFilled = 't';
-            strokeWt = '1.5pt';
+            strokeWt = '1.2pt';
           }
           let vmlFill = isFilled === 't' ? `fillcolor="${bgColor}"` : `filled="f"`;
           let htmlBg = isFilled === 't' ? `background:${bgColor};` : 'background:transparent;';
-          let htmlBorder = isFilled === 't' ? `1.5pt solid ${borderColor}` : `1pt solid black`;
+          let htmlBorder = isFilled === 't' ? `1.2pt solid ${borderColor}` : `0.75pt solid black`;
           
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:24pt;height:24pt;position:relative;margin-top:-2pt;v-text-anchor:middle;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0"><div style="text-align:center;font-size:10pt;color:${textColor};font-weight:bold;margin-top:3pt;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; padding:1pt 6pt; border-radius:12pt; ${htmlBg} color:${textColor}; font-weight:bold; font-size:12pt;">${text}</span><!--<![endif]-->`;
+          // User wants it 35% smaller (24 -> 15pt) and letters 25% smaller (10 -> 7pt)
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:15pt;height:15pt;position:relative;margin-top:-1pt;v-text-anchor:middle;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:7pt;color:${textColor};font-weight:bold;margin-top:2pt;mso-shading:transparent;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:16pt; height:16pt; border-radius:50%; ${htmlBg} color:${textColor}; font-weight:bold; font-size:8.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
-          (el as HTMLElement).style.padding = '0';
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.display = 'inline-block';
-          (el as HTMLElement).style.textAlign = 'center';
-          (el as HTMLElement).style.fontWeight = 'bold';
-          (el as HTMLElement).style.marginRight = '6pt';
-          (el as HTMLElement).style.verticalAlign = 'middle';
+          (el as HTMLElement).style.marginRight = '4pt';
         }
-        else if (mcqStyle === 2) el.innerHTML = `[${text}]`;
+        else if (mcqStyle === 2) {
+          // Just the letter in a box, no brackets, using VML for consistency and fixed size
+          el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:15pt;height:15pt;position:relative;margin-top:-1pt;v-text-anchor:middle;" filled="f" strokecolor="black" strokeweight="1pt"><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:7pt;color:black;font-weight:bold;margin-top:2pt;mso-shading:transparent;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.75pt solid black; width:16pt; height:16pt; color:black; font-weight:bold; font-size:8.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          (el as HTMLElement).style.border = 'none';
+          (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
+          (el as HTMLElement).style.backgroundColor = 'transparent';
+          (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
+          (el as HTMLElement).style.marginRight = '4pt';
+        }
         else if (mcqStyle === 6) el.innerHTML = `◆${text}`;
         else if (mcqStyle === 8) {
           el.innerHTML = text === 'A' ? 'Ⓐ' : text === 'B' ? 'Ⓑ' : text === 'C' ? 'Ⓒ' : 'Ⓓ';
@@ -392,21 +395,16 @@ export const exportToWord = (
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
         }
         else if (mcqStyle === 11 || mcqStyle === 12) {
-          // Double Circle / Dotted Circle -> use VML to control sizes
-          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="2.5pt"' : 'dashstyle="dot" strokeweight="1.5pt"';
-          let htmlBorder = mcqStyle === 11 ? '2.5pt double black' : '1.5pt dotted black';
+          // Double Circle / Dotted Circle -> smaller
+          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="2pt"' : 'dashstyle="dot" strokeweight="1pt"';
+          let htmlBorder = mcqStyle === 11 ? '2pt double black' : '1pt dotted black';
 
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:24pt;height:24pt;position:relative;margin-top:-2pt;v-text-anchor:middle;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0"><div style="text-align:center;font-size:10pt;color:black;font-weight:bold;margin-top:3pt;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; padding:1pt 6pt; border-radius:12pt; background:transparent; color:black; font-weight:bold; font-size:12pt;">${text}</span><!--<![endif]-->`;
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:15pt;height:15pt;position:relative;margin-top:-1pt;v-text-anchor:middle;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:7pt;color:black;font-weight:bold;margin-top:2pt;mso-shading:transparent;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:16pt; height:16pt; border-radius:50%; background:transparent; color:black; font-weight:bold; font-size:8.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
-          (el as HTMLElement).style.padding = '0';
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.display = 'inline-block';
-          (el as HTMLElement).style.textAlign = 'center';
-          (el as HTMLElement).style.fontWeight = 'bold';
-          (el as HTMLElement).style.marginRight = '6pt';
-          (el as HTMLElement).style.verticalAlign = 'middle';
+          (el as HTMLElement).style.marginRight = '4pt';
         }
         else if (mcqStyle === 13 || mcqStyle === 14) {
           // Solid background circles -> use dark Unicode to avoid square background
