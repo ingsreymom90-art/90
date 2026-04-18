@@ -46,38 +46,47 @@ body {
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-/* MCQ Letter Refinements */
+/* MCQ Letter Refinements - DESTROY THE SQUARE ARTIFACTS */
 .options-table b, .options-table .mcq-letter {
-    font-size: 10.5pt !important;
+    font-size: 10pt !important;
     font-weight: 700 !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 19pt !important;
-    height: 19pt !important;
-    min-width: 19pt !important;
-    min-height: 19pt !important;
-    border: 1.1pt solid black !important;
+    display: inline-grid !important;
+    place-items: center !important;
+    width: 17pt !important;
+    height: 17pt !important;
+    min-width: 17pt !important;
+    min-height: 17pt !important;
+    border: 1.1pt solid #000000 !important;
+    border-style: solid !important;
     border-radius: 50% !important;
-    margin: 0 6pt 0 0 !important;
+    margin: 0 5pt 0 0 !important;
     background: #ffffff !important;
     background-color: #ffffff !important;
     padding: 0 !important;
     color: #000000 !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    line-height: normal !important;
+    line-height: 0 !important;
     outline: none !important;
     outline: 0 !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     text-decoration: none !important;
-    transform: translateY(-1.2pt) !important; /* Lift letters more */
+    transform: translateY(-1.8pt) !important; /* Lift letters aggressively */
     -webkit-print-color-adjust: exact !important;
     overflow: hidden !important;
     box-shadow: none !important;
     -webkit-tap-highlight-color: transparent !important;
     user-select: none !important;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    cursor: default !important;
+}
+
+.options-table b::-moz-focus-inner,
+.options-table .mcq-letter::-moz-focus-inner {
+    border: 0 !important;
+    padding: 0 !important;
 }
 
 .glass-panel {
@@ -187,12 +196,14 @@ body {
 
 .options-table td, [data-type="mcq-options"] td {
     border: none !important;
-    padding: 2px 8px !important;
+    padding: 1px 8px !important;
     text-align: left !important;
     vertical-align: middle !important;
     font-size: 0.95em;
-    line-height: 1.6;
+    line-height: 1.3;
     white-space: nowrap !important;
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 /* Adds the 7-space indentation for Option A */

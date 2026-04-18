@@ -3519,15 +3519,15 @@ ${componentLogic}
                               {['A', 'B', 'C', 'D'].map(opt => (
                                 <div key={opt} className="text-[7px] text-slate-500 flex items-center gap-1">
                                   <span className={
-                                    mcqStyle === 1 ? 'w-5 h-5 flex items-center justify-center rounded-full border border-slate-300 pb-1.5 leading-none bg-white select-none transition-none' : 
-                                    mcqStyle === 2 ? 'w-5 h-5 flex items-center justify-center border border-slate-300 pb-1.5 leading-none bg-white select-none transition-none' : 
+                                    mcqStyle === 1 ? 'w-5 h-5 flex items-center justify-center rounded-full border border-slate-300 pb-2 leading-none bg-white select-none transition-none' : 
+                                    mcqStyle === 2 ? 'w-5 h-5 flex items-center justify-center border border-slate-300 pb-2 leading-none bg-white select-none transition-none' : 
                                     mcqStyle === 3 ? '('+opt+')' : 
                                     mcqStyle === 4 ? 'underline' : 
                                     mcqStyle === 5 ? 'font-bold' : 
-                                    mcqStyle === 6 ? 'rotate-45 w-5 h-5 flex items-center justify-center border border-slate-300 inline-block pb-1.5 leading-none bg-white select-none transition-none' :
+                                    mcqStyle === 6 ? 'rotate-45 w-5 h-5 flex items-center justify-center border border-slate-300 inline-block pb-2 leading-none bg-white select-none transition-none' :
                                     mcqStyle === 7 ? '['+opt+']' :
-                                    mcqStyle === 8 ? 'w-5 h-5 flex items-center justify-center rounded-full bg-slate-900 text-white pb-1.5 leading-none select-none transition-none' :
-                                    mcqStyle === 9 ? 'w-5 h-5 flex items-center justify-center bg-slate-900 text-white pb-1.5 leading-none select-none transition-none' :
+                                    mcqStyle === 8 ? 'w-5 h-5 flex items-center justify-center rounded-full bg-slate-900 text-white pb-2 leading-none select-none transition-none' :
+                                    mcqStyle === 9 ? 'w-5 h-5 flex items-center justify-center bg-slate-900 text-white pb-2 leading-none select-none transition-none' :
                                     mcqStyle === 10 ? '(('+opt+'))' :
                                     mcqStyle === 15 ? 'rounded-[50%_50%_50%_50%_/_60%_60%_40%_40%] border-2 border-purple-600 px-2' :
                                     ''
