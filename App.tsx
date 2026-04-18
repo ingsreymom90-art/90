@@ -544,7 +544,85 @@ function App() {
   
   const [isSingleReadingText, setIsSingleReadingText] = useState(false);
   const [isRelaxingBackgroundEnabled, setIsRelaxingBackgroundEnabled] = useState(true);
+  const [userCustomBackground, setUserCustomBackground] = useState<string | null>(() => {
+    return localStorage.getItem('dp_user_custom_bg');
+  });
   const [currentBackground, setCurrentBackground] = useState("https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=2000&auto=format&fit=crop"); // Ocean morning default
+
+  const exportToCSV = () => {
+    if (!worksheetContent) {
+      alert("Generate content first!");
+      return;
+    }
+    
+    // Create a temporary DOM element to parse the HTML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(worksheetContent, 'text/html');
+    const rows = [['Part', 'Number', 'Question', 'Options', 'Answer Key']];
+    
+    // Attempt to extract information from the structured HTML
+    const parts = doc.querySelectorAll('table:not(.options-table):not(.professional-table)');
+    const answerKeySection = doc.querySelector('.answer-key-section');
+    const answerKeyText = answerKeySection ? answerKeySection.textContent || '' : '';
+    
+    // Extraction strategy
+    // We look for tables because many layouts use them for parts
+    doc.querySelectorAll('tr').forEach(tr => {
+      const header = tr.querySelector('.header-row');
+      if (header) {
+        const partName = header.textContent?.trim() || '';
+        // Extract items in subsequent siblings if they aren't header rows themselves
+        let nextTr = tr.nextElementSibling;
+        while (nextTr && !nextTr.querySelector('.header-row')) {
+          // Find question numbers in the row
+          const text = nextTr.textContent || '';
+          const match = text.match(/(\d+)[\.\)]\s*(.*)/);
+          if (match) {
+            const num = match[1];
+            let question = match[2].trim();
+            
+            // For MCQs, the options might be in nested tables
+            const optionsTable = nextTr.querySelector('.options-table');
+            let optionsStr = '';
+            if (optionsTable) {
+              const options = Array.from(optionsTable.querySelectorAll('td')).map(td => td.textContent?.trim()).filter(Boolean);
+              optionsStr = options.join(' || ');
+              // Clean question of options if they leaked in
+              question = question.split('A.')[0].split('A)')[0].trim();
+            }
+            
+            // Find answer in the key
+            const answerMatch = answerKeyText.match(new RegExp(`${num}[:\\.][\\s*]*(<b>)?([A-D])(</b>)?`, 'i'));
+            const answer = answerMatch ? answerMatch[2] : '';
+            
+            rows.push([partName, num, question, optionsStr, answer]);
+          }
+          nextTr = nextTr.nextElementSibling;
+        }
+      }
+    });
+
+    // Fallback for non-table parts
+    if (rows.length === 1) {
+      doc.querySelectorAll('p').forEach(p => {
+        const text = p.textContent || '';
+        const match = text.match(/(\d+)[\.\)]\s*(.*)/);
+        if (match) {
+          rows.push(['Main', match[1], match[2], '', '']);
+        }
+      });
+    }
+
+    const csvContent = rows.map(r => r.map(c => `"${(c || '').replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `dpss_dataset_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const randomizeBackground = () => {
     const backgrounds = [
@@ -902,6 +980,7 @@ function App() {
   const [sourceMaterial, setSourceMaterial] = useState<QuickSource | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoUploadRef = useRef<HTMLInputElement>(null);
+  const bgUploadRef = useRef<HTMLInputElement>(null);
 
   const [loginName, setLoginName] = useState('');
   const [loginCode, setLoginCode] = useState('');
@@ -1114,6 +1193,26 @@ function App() {
     }
   };
 
+  const handleUserBgUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Background image too large. Please use a file under 5MB.");
+      return;
+    }
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setUserCustomBackground(dataUrl);
+        localStorage.setItem('dp_user_custom_bg', dataUrl);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Background upload error:', err);
+    }
+  };
+
   const removeLogo = (index: number) => {
     setBrandSettings(prev => {
       const newLogos = [...prev.logos];
@@ -1288,11 +1387,38 @@ ${customHtml}
       partBackgroundInstruction = `\n${PART_BACKGROUND_INSTRUCTION}`;
     }
 
+    const instructionStyles = [
+      { id: 0, name: 'Brutalist Pop', prompt: 'background-color: #facc15; border: 4pt solid black; box-shadow: 8px 8px 0px black; text-transform: uppercase; font-style: italic; font-weight: 900; color: black; padding: 10px;' },
+      { id: 1, name: 'Elegant Gold', prompt: 'background: linear-gradient(to right, #f59e0b, #ea580c); color: white; display: inline-block; padding: 8px 20px; font-weight: 900; border-radius: 8px; font-style: italic; box-shadow: 0 4px 10px rgba(0,0,0,0.2);' },
+      { id: 2, name: 'Minimalist Gray', prompt: 'border-bottom: 1.5pt solid #cbd5e1; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 2pt; padding-bottom: 5px; background: transparent;' },
+      { id: 3, name: 'Gradient Night', prompt: 'background: linear-gradient(to right, #1e293b, #334155); color: white; border-left: 10pt solid #6366f1; padding: 12px 20px; font-weight: bold; border-radius: 4px;' },
+      { id: 4, name: 'Neon Emerald', prompt: 'border: 2pt solid #10b981; color: #065f46; background-color: #ecfdf5; font-weight: 900; text-transform: uppercase; border-radius: 6px; padding: 5px 12px;' },
+      { id: 5, name: 'Brutalist Yellow', prompt: 'background-color: #fde047; border: 6pt solid black; color: black; font-weight: 900; padding: 15px; text-transform: uppercase;' },
+      { id: 6, name: 'Mix Styles', prompt: 'background: linear-gradient(90deg, #6366f1, #a855f7); color: white; border-radius: 12px; font-weight: bold; padding: 8px 15px;' },
+      { id: 7, name: 'Pill Shape', prompt: 'background-color: #fef3c7; color: #92400e; border: 1pt solid #fde68a; border-radius: 50px; padding: 10px 30px; font-weight: bold;' },
+      { id: 8, name: 'Underlined Bold', prompt: 'text-decoration: underline black 3pt; text-underline-offset: 6pt; font-weight: 900; text-transform: uppercase; background: transparent;' },
+      { id: 9, name: 'Boxed Shadow', prompt: 'background: white; border: 1pt solid #e2e8f0; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-radius: 12px; padding: 10px; font-weight: 900;' },
+      { id: 10, name: 'Dark Mode', prompt: 'background: #1e293b; color: white; border-radius: 8px; padding: 10px 15px; font-weight: bold;' },
+      { id: 11, name: 'Italic Elegant', prompt: 'font-style: italic; font-family: serif; color: #475569; border-bottom: 1pt solid #cbd5e1; padding-bottom: 4px; background: transparent;' },
+      { id: 12, name: 'Double Line', prompt: 'border-top: 2pt solid #94a3b8; border-bottom: 2pt solid #94a3b8; padding: 10px 0; font-weight: bold; background: transparent;' },
+      { id: 13, name: 'Soft Highlight', prompt: 'background-color: #fef9c3; color: #854d0e; padding: 4px 10px; border-radius: 4px; border-left: 4pt solid #facc15;' },
+      { id: 14, name: 'Corner Accent', prompt: 'border-top: 5pt solid #6366f1; border-left: 5pt solid #6366f1; background: #f5f3ff; color: #4338ca; padding: 10px; font-weight: bold;' },
+      { id: 15, name: 'Dashed Grey', prompt: 'border: 2pt dashed #94a3b8; color: #64748b; padding: 8px; font-weight: bold; text-transform: uppercase;' },
+      { id: 16, name: 'Modern Outline', prompt: 'border: 1pt solid #3b82f6; color: #2563eb; background: #eff6ff; border-radius: 10px; padding: 6px 15px; font-weight: bold;' },
+      { id: 17, name: 'Bold Caps', prompt: 'text-transform: uppercase; font-weight: 900; letter-spacing: 0.2em; font-size: 1.1em; background: transparent;' },
+      { id: 18, name: 'Left Bar Green', prompt: 'border-left: 8pt solid #10b981; background: #ecfdf5; color: #065f46; padding: 10px 20px; font-weight: bold;' },
+      { id: 19, name: 'Right Align', prompt: 'text-align: right; border-right: 6pt solid #cbd5e1; padding: 10px 20px; color: #475569; font-weight: bold;' }
+    ];
+
+    const selStyle = instructionStyles.find(s => s.id === instructionHeaderStyle) || instructionStyles[6];
+
     let instructionBackgroundInstruction = '';
     if (isInstructionBackgroundEnabled) {
-      instructionBackgroundInstruction = `\n${INSTRUCTION_HEADER_BACKGROUND_INSTRUCTION}`;
+      instructionBackgroundInstruction = `\n[INSTRUCTION HEADER STYLE - MANDATORY]: Every part header (e.g. PART A: ...) MUST be wrapped in a styling tag (like <div> or <span>) with EXACTLY this style: "${selStyle.prompt}". DO NOT use any other styles for the instruction header. 
+      [SUBTLE ROTATION]: If you generate more than 3 parts, you may slightly vary the color of the background using other soft tones if the style allows, but you MUST respect the structural theme of the selected style: "${selStyle.name}".`;
     } else {
-      instructionBackgroundInstruction = `\n[STRICT NO-COLOR MODE]: You are strictly forbidden from applying any background-color or shading to the instruction header row. The background-color MUST be "transparent" or excluded entirely. The text color must be black (#000000). DO NOT use any colors from the background protocol. This is a "No Color" test.`;
+      instructionBackgroundInstruction = `\n[STRICT NO-COLOR MODE]: You are strictly forbidden from applying any background-color, shading, or highlight to the instruction header, intros, or any other part titles. EVERYTHING MUST BE TRANSPARENT. Text color MUST be black (#000000). THIS IS A PRINTER-FRIENDLY NO-COLOR TEST.
+      - ALSO: Ensure NO colored backgrounds for any introduction text or titles.`;
     }
 
     // Randomize blank style between underscores and dots
@@ -1463,7 +1589,8 @@ ${customHtml}
     ${mcqLayout === 'single' ? '- ONE LINE: Create a <table> with 1 row and 4 columns. Row 1: [A, B, C, D].' : 
       mcqLayout === 'double' ? '- TWO LINES: Create a <table> with 2 rows and 2 columns. Row 1: [A, B], Row 2: [C, D]. (This ensures A and C are vertically aligned in the first column).' : 
       '- FOUR LINES: Create a <table> with 4 rows and 1 column. Row 1: [A], Row 2: [B], Row 3: [C], Row 4: [D].'}
-    ${mcqStyle > 0 ? '- [STYLE]: Wrap the option letters (A, B, C, D) in <b> tags (e.g., <td><b>A</b> Option text</td>). MANDATORY: DO NOT use brackets like (A) or [A]. Just the plain letter inside the <b> tag. These will be styled as professional badges.' : '- [STYLE]: Use plain letters (A, B, C, D) followed by a period.'}
+    ${mcqStyle > 0 ? '- [STYLE]: Wrap the option letters (A, B, C, D) in <b> tags (e.g., <td><b>A</b> Option text</td>). MANDATORY: DO NOT use brackets like (A) or [A]. Just the plain letter inside the <b> tag.' : '- [STYLE]: Use plain letters (A, B, C, D) followed by a period.'}
+    [INLINE ENFORCEMENT]: You MUST ensure each option (Label + Text) stays on a SINGLE LINE. DO NOT allow the text to wrap to a second line.
     
     [MCQ DESIGN VARIETY]:
     - Randomly choose between these styles for the question line:
@@ -1725,7 +1852,29 @@ ${componentLogic}
       }
 
       setGenerationStep('Finalizing Layout...');
-      setWorksheetContent(result.text);
+      
+      let finalHtml = result.text;
+      
+      // POST-PROCESSING: Enforcement of "No Color" mode if disabled
+      if (!isInstructionBackgroundEnabled) {
+        // Strip common background styles from the generated HTML
+        finalHtml = finalHtml.replace(/background-color:[^;"]+;?/gi, 'background-color:transparent;')
+                             .replace(/background:[^;"]+;?/gi, 'background:transparent;')
+                             .replace(/bgcolor="[^"]+"/gi, 'bgcolor="transparent"');
+      }
+
+      // Aggressive redundancy removal for headers
+    finalHtml = finalHtml.replace(/<div[^>]*header-design[^>]*>[\s\S]*?<\/div>/gi, '');
+    
+    // Ensure "Introduction" text doesn't have background color if disabled
+    if (!isInstructionBackgroundEnabled) {
+      finalHtml = finalHtml.replace(/<div[^>]*>Introduction:[\s\S]*?<\/div>/gi, (match) => {
+        return match.replace(/background-color:[^;"]+;?/gi, 'background-color:transparent;')
+                    .replace(/background:[^;"]+;?/gi, 'background:transparent;');
+      });
+    }
+
+    setWorksheetContent(finalHtml);
       setIsGenerating(false);
       setGenerationStep('');
       setGenerationError(null);
@@ -2135,12 +2284,12 @@ ${componentLogic}
               marginLeft: isSidebarOpen && sidebarSide === 'left' ? (windowWidth >= 1024 ? `${sidebarWidth}px` : '0px') : '0px',
               marginRight: isSidebarOpen && sidebarSide === 'right' ? (windowWidth >= 1024 ? `${sidebarWidth}px` : '0px') : '0px'
             }}
-            className="flex-1 flex flex-col overflow-hidden transition-all duration-500 relative"
+            className="flex-1 flex flex-col overflow-y-auto transition-all duration-500 relative"
           >
             {isRelaxingBackgroundEnabled && (
                <div 
                  className="absolute inset-0 z-0 bg-cover bg-center transition-all duration-1000"
-                 style={{ backgroundImage: `url('${currentBackground}')` }}
+                 style={{ backgroundImage: `url('${userCustomBackground || currentBackground}')` }}
                >
                  <div className="absolute inset-0 bg-white/5 backdrop-blur-[2px]"></div>
                </div>
@@ -5503,13 +5652,13 @@ ${componentLogic}
              </div>
              <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'fixed top-2 left-4 z-[300]' : 'px-6 lg:px-12 mb-8'}`}>
                <div className={`flex bg-slate-100/70 p-1 rounded-[32px] gap-1 overflow-x-auto no-scrollbar shadow-inner ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'scale-75 origin-left opacity-50 hover:opacity-100 transition-opacity' : ''}`}>
-                 {['COMMAND', 'ACCOUNT', 'ENGINE', 'BACKBONE LOGIC', 'DESIGN', 'FORMAT_DESIGN', 'LOGO'].map(tab => (
+                 {['COMMAND', 'ACCOUNT', 'ENGINE', 'BACKBONE LOGIC', 'DESIGN', 'FORMAT_DESIGN', 'BACKGROUND', 'LOGO'].map(tab => (
                    <button 
                      key={tab} 
                      onClick={() => setSettingsTab(tab as SettingsTab)} 
                      className={`px-4 lg:px-6 py-2 rounded-[28px] text-[9px] font-black uppercase tracking-widest transition-all ${settingsTab === tab ? 'bg-orange-600 text-white shadow-xl' : 'text-slate-400 hover:text-slate-600'}`}
                    >
-                     {tab === 'FORMAT_DESIGN' ? 'DESIGN TEST FORMAT' : tab.replace('_', ' ')}
+                     {tab === 'FORMAT_DESIGN' ? 'DESIGN TEST FORMAT' : tab === 'BACKGROUND' ? 'UPLOAD BG' : tab.replace('_', ' ')}
                    </button>
                  ))}
                </div>
@@ -5623,6 +5772,91 @@ ${componentLogic}
                         setShowSettings(false);
                       }}
                     />
+                  </div>
+                )}
+                {settingsTab === 'BACKGROUND' && (
+                  <div className="space-y-12 animate-in fade-in slide-in-from-bottom-6 overflow-hidden">
+                    <div className="space-y-8">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-[13px] font-black text-slate-900 uppercase tracking-widest">Workspace Atmosphere</h3>
+                        <button 
+                          onClick={() => {
+                            setUserCustomBackground(null);
+                            localStorage.removeItem('dp_user_custom_bg');
+                          }}
+                          className="text-[11px] font-black text-rose-500 uppercase border-b-2 border-rose-500"
+                        >
+                          Reset to Default
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                        <div className="space-y-6">
+                           <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Custom Backdrop</label>
+                           <div 
+                             onClick={() => bgUploadRef.current?.click()}
+                             className="group relative h-64 w-full bg-slate-100 border-4 border-dashed border-slate-200 rounded-[48px] overflow-hidden cursor-pointer hover:border-orange-500 transition-all flex items-center justify-center"
+                           >
+                             {userCustomBackground ? (
+                               <img src={userCustomBackground} className="absolute inset-0 w-full h-full object-cover transition-transform group-hover:scale-105" />
+                             ) : (
+                               <div className="flex flex-col items-center gap-4">
+                                 <i className="fa-solid fa-cloud-arrow-up text-5xl text-slate-300"></i>
+                                 <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Upload Custom Experience</span>
+                               </div>
+                             )}
+                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                               <span className="bg-white px-6 py-2 rounded-full text-[10px] font-black uppercase text-slate-900 shadow-xl">Change Background</span>
+                             </div>
+                           </div>
+                           <p className="text-[10px] font-medium text-slate-400 italic px-4">Upload a high-quality JPG/PNG to personalize your entire workstation atmosphere.</p>
+                        </div>
+
+                        <div className="space-y-8">
+                          <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Atmosphere Fidelity</label>
+                          <div className="space-y-4 p-8 bg-slate-50 rounded-[40px] border border-slate-100">
+                             <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Enable Atmosphere Layer</span>
+                                <button 
+                                  onClick={() => setIsRelaxingBackgroundEnabled(!isRelaxingBackgroundEnabled)}
+                                  className={`w-12 h-6 rounded-full transition-all relative ${isRelaxingBackgroundEnabled ? 'bg-orange-600 shadow-lg shadow-orange-100' : 'bg-slate-300'}`}
+                                >
+                                  <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-all ${isRelaxingBackgroundEnabled ? 'left-7' : 'left-1'}`}></div>
+                                </button>
+                             </div>
+                             <div className="h-px bg-slate-200 w-full"></div>
+                             <div className="flex items-center justify-between">
+                                <span className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Atmosphere Blur</span>
+                                <div className="flex items-center gap-4">
+                                  <div className="h-1.5 w-32 bg-slate-200 rounded-full overflow-hidden">
+                                     <div className="h-full bg-orange-600 w-1/3"></div>
+                                  </div>
+                                  <span className="text-[11px] font-black text-slate-400 uppercase">2px</span>
+                                </div>
+                             </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-3 gap-3">
+                             {[
+                               "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop",
+                               "https://images.unsplash.com/photo-1497215728101-856f4ea42174?auto=format&fit=crop",
+                               "https://images.unsplash.com/photo-1518133910546-b6c2fb7d79e3?auto=format&fit=crop"
+                             ].map(img => (
+                               <div 
+                                 key={img}
+                                 onClick={() => {
+                                   setUserCustomBackground(null);
+                                   localStorage.removeItem('dp_user_custom_bg');
+                                   setCurrentBackground(img);
+                                 }}
+                                 className="h-16 rounded-2xl bg-cover bg-center cursor-pointer hover:ring-2 ring-orange-500 transition-all border border-white"
+                                 style={{ backgroundImage: `url('${img}')` }}
+                               ></div>
+                             ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
                 {settingsTab === 'LOGO' && (
@@ -6413,6 +6647,13 @@ ${componentLogic}
         className="hidden" 
         accept="image/*" 
         onChange={handleLogoUpload} 
+      />
+      <input 
+        type="file" 
+        ref={bgUploadRef} 
+        className="hidden" 
+        accept="image/*" 
+        onChange={handleUserBgUpload} 
       />
     </div>
     </ErrorBoundary>

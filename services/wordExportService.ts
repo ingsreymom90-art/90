@@ -269,29 +269,35 @@ export const exportToWord = (
     topicText || ''
   );
 
-  // If we have brandSettings, we want to REMOVE the existing header from the AI-generated content
-  // to avoid duplication. The AI usually puts it in an H1 or H2 at the top.
+  // If we have brandSettings, aggressively remove redundant headers from content
   if (brandSettings) {
-    const firstTitle = tempDiv.querySelector('h1, h2, .school-header');
-    if (firstTitle) {
-      // Check if it's at the very beginning
-      const prevSiblings = [];
-      let sib = firstTitle.previousElementSibling;
-      while (sib) { prevSiblings.push(sib); sib = sib.previousElementSibling; }
-      
-      // If it looks like a header (contains school name parts), remove it
-      const headerText = firstTitle.textContent?.toUpperCase() || '';
-      const schoolNamePart = (brandSettings.schoolName || 'GLOBAL EDUCATION').split(' ')[0].toUpperCase();
-      
-      if (headerText.includes(schoolNamePart) || headerText.includes('ACADEMIC EVALUATION')) {
-        firstTitle.remove();
-        // Also remove some siblings if they look like the academic evaluation subheader
-        const nextHeader = tempDiv.querySelector('h2, h3, p');
-        if (nextHeader && (nextHeader.textContent?.toUpperCase().includes('ACADEMIC') || nextHeader.textContent?.toUpperCase().includes('EVALUATION'))) {
-          nextHeader.remove();
+    const headerSelectors = ['h1', 'h2', 'h3', '.school-header', '.worksheet-header', '.academic-evaluation'];
+    const schoolNamePart = (brandSettings.schoolName || 'GLOBAL').split(' ')[0].toUpperCase();
+    
+    // Find all potential headers and remove them if they overlap with professional header info
+    tempDiv.querySelectorAll(headerSelectors.join(',')).forEach(el => {
+      const text = el.textContent?.toUpperCase() || '';
+      if (
+        text.includes(schoolNamePart) || 
+        text.includes('ACADEMIC EVALUATION') || 
+        text.includes('GLOBAL EDUCATION') ||
+        (text.length > 0 && brandSettings.schoolName?.toUpperCase().includes(text))
+      ) {
+        // Also remove following elements if they look like evaluation labels or empty spacer paragraphs
+        let next = el.nextElementSibling;
+        while (next && (next.tagName === 'P' || next.tagName === 'DIV' || next.tagName.startsWith('H'))) {
+          const nextText = next.textContent?.toUpperCase() || '';
+          if (nextText.includes('ACADEMIC') || nextText.includes('EVALUATION') || nextText.trim() === '') {
+            const temp = next;
+            next = next.nextElementSibling;
+            temp.remove();
+          } else {
+            break;
+          }
         }
+        el.remove();
       }
-    }
+    });
   }
 
   // Dynamic Line Spacing Logic
@@ -401,9 +407,10 @@ export const exportToWord = (
             let htmlBg = isFilled === 't' ? `background:${bgColor};` : 'background:transparent;';
             let htmlBorder = isFilled === 't' ? `0.75pt solid ${borderColor}` : `0.5pt solid black`;
             
-            // OVAL: 11.25pt wide, 4.5pt high. Masking "ghost squares" with explicit white background.
-            // Letters shrunken to 2.2pt and squashed height with 0.6 line-height.
-            el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:11.25pt;height:4.5pt;position:relative;top:3.5pt;v-text-anchor:middle;mso-shading:white;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;mso-shading:white;background:white;"><div style="text-align:center;font-size:2.2pt;color:${textColor};font-weight:bold;margin-top:0pt;mso-shading:white;background:white;border:none;mso-border-alt:none;line-height:0.6;mso-line-height-rule:exactly;outline:none;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:12pt; height:6pt; border-radius:3pt; ${htmlBg} color:${textColor}; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+            // OVAL: 11.25pt wide, 4.5pt high. Masking "ghost squares" with filled="f" and stroked="f" on textbox.
+            // Letters shrunken to 8pt and squashed height with 0.5 line-height for "shorter" look.
+            // Alignment fix: position:relative; top:1pt.
+            el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:11.25pt;height:4.5pt;position:relative;top:1pt;v-text-anchor:middle;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:8pt;color:${textColor};font-weight:bold;margin-top:0pt;line-height:0.5;mso-line-height-rule:exactly;mso-text-raise:0pt;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:12pt; height:6pt; border-radius:3pt; ${htmlBg} color:${textColor}; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
             (el as HTMLElement).style.border = 'none';
             (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
             (el as HTMLElement).style.backgroundColor = 'transparent';
@@ -412,8 +419,8 @@ export const exportToWord = (
             (el as HTMLElement).style.verticalAlign = 'baseline';
           }
           else if (mcqStyle === 2) {
-            // Box style shrunken for flat look
-            el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:11.25pt;height:4.5pt;position:relative;top:3.5pt;v-text-anchor:middle;mso-shading:white;" filled="f" strokecolor="black" strokeweight="0.5pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;mso-shading:white;background:white;"><div style="text-align:center;font-size:2.2pt;color:black;font-weight:bold;margin-top:0pt;mso-shading:white;background:white;border:none;mso-border-alt:none;line-height:0.6;mso-line-height-rule:exactly;outline:none;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.5pt solid black; width:12pt; height:6pt; color:black; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+            // Box style shrunken for flat look - Alignment fix: Reduced top to 1pt. 8pt font for legibility.
+            el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:11.25pt;height:4.5pt;position:relative;top:1pt;v-text-anchor:middle;" filled="f" strokecolor="black" strokeweight="0.5pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:8pt;color:black;font-weight:bold;margin-top:0pt;line-height:0.5;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.5pt solid black; width:12pt; height:6pt; color:black; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
             (el as HTMLElement).style.border = 'none';
             (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
             (el as HTMLElement).style.backgroundColor = 'transparent';
@@ -430,11 +437,11 @@ export const exportToWord = (
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
         }
         else if (mcqStyle === 11 || mcqStyle === 12) {
-          // Double Circle / Dotted Circle -> Oval tiny
+          // Double Circle / Dotted Circle -> Oval tiny - Alignment fix: Reduced top to 1.5pt. 8pt shrunken font.
           let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="1.2pt"' : 'dashstyle="dot" strokeweight="0.5pt"';
           let htmlBorder = mcqStyle === 11 ? '1.2pt double black' : '0.5pt dotted black';
 
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:11.25pt;height:4.5pt;position:relative;top:4pt;v-text-anchor:middle;mso-shading:white;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;mso-shading:white;background:white;"><div style="text-align:center;font-size:2.2pt;color:black;font-weight:bold;margin-top:0pt;mso-shading:white;background:white;border:none;mso-border-alt:none;line-height:0.6;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:12pt; height:6pt; border-radius:3pt; background:transparent; color:black; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:11.25pt;height:4.5pt;position:relative;top:1.5pt;v-text-anchor:middle;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:8pt;color:black;font-weight:bold;margin-top:0pt;line-height:0.5;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:12pt; height:6pt; border-radius:3pt; background:transparent; color:black; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';

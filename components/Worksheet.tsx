@@ -177,10 +177,9 @@ const Worksheet: React.FC<WorksheetProps> = ({
           .prose table table { border: none !important; margin-top: 5pt !important; width: auto !important; background: transparent !important; }
           .prose table table td { border: none !important; padding: 2pt 10pt !important; background: transparent !important; }
           .prose table table tr td:first-child { padding-left: 30pt !important; }
-          .prose .options-table { width: 100% !important; table-layout: fixed !important; background: transparent !important; }
-          .prose .options-table td { padding-left: 30pt !important; background: transparent !important; }
-          .prose .options-table tr td:first-child { padding-left: 30pt !important; }
-          .prose .options-table tr td:not(:first-child) { padding-left: 10pt !important; }
+          .prose .options-table { width: 100% !important; table-layout: auto !important; background: transparent !important; border-collapse: collapse !important; margin-bottom: 5pt !important; }
+          .prose .options-table td { padding: 4pt 8pt 4pt 0 !important; background: transparent !important; vertical-align: top !important; line-height: 1.2 !important; white-space: normal !important; }
+          .prose .options-table td b, .prose .options-table td strong { white-space: nowrap !important; }
           .prose .blank-line { border-bottom: 1pt solid black; display: inline-block; min-width: 50pt; margin: 0 5pt; }
           .prose .checkbox-box { border: 1pt solid black; width: 12pt; height: 12pt; display: inline-block; margin-right: 5pt; vertical-align: middle; }
           .prose th, .prose td { border: 1pt solid black !important; padding: 6pt !important; vertical-align: top !important; background: transparent !important; }
@@ -565,13 +564,15 @@ const Worksheet: React.FC<WorksheetProps> = ({
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 1.2em;
-            height: 1.2em;
+            min-width: 1.1em;
+            height: 0.5em; /* Shorter by 50% from default 1em */
             margin-right: 0.4em;
             transition: all 0.2s;
             border: none;
             background: transparent;
             font-weight: 700 !important;
+            font-size: 0.4em; /* Smaller by 20%+ */
+            vertical-align: middle;
           }
 
           /* MCQ Style 0: Standard (No special styling) */

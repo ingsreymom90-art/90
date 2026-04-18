@@ -140,237 +140,240 @@ const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <div className={`w-full h-full flex flex-col overflow-hidden ${isOpen ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300`} style={{ width: `${width}px` }}>
-        <div className="p-6 flex flex-col gap-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-200">
-                <i className="fa-solid fa-sparkles text-white text-lg"></i>
-              </div>
-              <div>
-                <h1 className="text-sm font-bold text-slate-800 leading-none">DPSS Virtues</h1>
-                <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Version 2.0</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <button 
-                onClick={() => onSideChange?.(side === 'left' ? 'right' : 'left')}
-                className="h-8 w-8 bg-slate-50 text-slate-400 rounded-lg flex items-center justify-center hover:bg-slate-100 hover:text-orange-600 transition-all"
-                title="Switch Side"
-              >
-                <i className={`fa-solid ${side === 'left' ? 'fa-right-left' : 'fa-left-right'}`}></i>
-              </button>
-              <button 
-                onClick={onClose}
-                className="h-8 w-8 bg-slate-50 text-slate-400 rounded-lg flex items-center justify-center hover:bg-slate-100 hover:text-orange-600 transition-all"
-                title="Hide Sidebar"
-              >
-                <i className="fa-solid fa-chevron-left"></i>
-              </button>
-            </div>
-          </div>
-
-          {/* User Profile / Login */}
-          <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-            {user ? (
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 overflow-hidden">
-                  {user.photoURL ? (
-                    <img src={user.photoURL} alt={user.displayName} className="h-8 w-8 rounded-full border border-white shadow-sm" referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="h-8 w-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-xs uppercase">
-                      {user.displayName?.charAt(0) || user.email?.charAt(0)}
-                    </div>
-                  )}
-                  <div className="flex flex-col overflow-hidden">
-                    <span className="text-[10px] font-bold text-slate-700 truncate">{user.displayName}</span>
-                    <span className="text-[8px] text-slate-400 truncate">{user.email}</span>
-                  </div>
+        {/* Main Scrollable Content */}
+        <div className="flex-1 overflow-y-auto no-scrollbar">
+          <div className="p-6 flex flex-col gap-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg shadow-orange-200">
+                  <i className="fa-solid fa-sparkles text-white text-lg"></i>
                 </div>
+                <div>
+                  <h1 className="text-sm font-bold text-slate-800 leading-none">DPSS Virtues</h1>
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Version 2.0</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
                 <button 
-                  onClick={onLogout}
-                  className="h-7 w-7 bg-white text-slate-400 rounded-lg flex items-center justify-center hover:text-rose-600 transition-all shadow-sm"
-                  title="Logout"
+                  onClick={() => onSideChange?.(side === 'left' ? 'right' : 'left')}
+                  className="h-8 w-8 bg-slate-50 text-slate-400 rounded-lg flex items-center justify-center hover:bg-slate-100 hover:text-orange-600 transition-all"
+                  title="Switch Side"
                 >
-                  <i className="fa-solid fa-right-from-bracket text-[10px]"></i>
+                  <i className={`fa-solid ${side === 'left' ? 'fa-right-left' : 'fa-left-right'}`}></i>
+                </button>
+                <button 
+                  onClick={onClose}
+                  className="h-8 w-8 bg-slate-50 text-slate-400 rounded-lg flex items-center justify-center hover:bg-slate-100 hover:text-orange-600 transition-all"
+                  title="Hide Sidebar"
+                >
+                  <i className="fa-solid fa-chevron-left"></i>
                 </button>
               </div>
-            ) : (
+            </div>
+
+            {/* User Profile / Login */}
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+              {user ? (
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 overflow-hidden">
+                    {user.photoURL ? (
+                      <img src={user.photoURL} alt={user.displayName} className="h-8 w-8 rounded-full border border-white shadow-sm" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="h-8 w-8 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center font-bold text-xs uppercase">
+                        {user.displayName?.charAt(0) || user.email?.charAt(0)}
+                      </div>
+                    )}
+                    <div className="flex flex-col overflow-hidden">
+                      <span className="text-[10px] font-bold text-slate-700 truncate">{user.displayName}</span>
+                      <span className="text-[8px] text-slate-400 truncate">{user.email}</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={onLogout}
+                    className="h-7 w-7 bg-white text-slate-400 rounded-lg flex items-center justify-center hover:text-rose-600 transition-all shadow-sm"
+                    title="Logout"
+                  >
+                    <i className="fa-solid fa-right-from-bracket text-[10px]"></i>
+                  </button>
+                </div>
+              ) : (
+                <button 
+                  onClick={onLogin}
+                  className="w-full py-2 bg-orange-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-700 transition-all shadow-md shadow-orange-200"
+                >
+                  <i className="fa-solid fa-user"></i> Login with Google
+                </button>
+              )}
+            </div>
+
+            <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
+              {['GRAMMAR', 'READING', 'VOCABULARY', 'MIXED'].map(mod => (
+                <button
+                  key={mod}
+                  onClick={() => onModuleChange(mod.charAt(0) + mod.slice(1).toLowerCase())}
+                  className={`flex-1 py-2 rounded-lg text-[8px] font-bold transition-all ${
+                    activeModule.toUpperCase() === mod 
+                      ? 'bg-white text-orange-600 shadow-sm' 
+                      : 'text-slate-500 hover:text-slate-700'
+                  }`}
+                >
+                  {mod}
+                </button>
+              ))}
+            </div>
+
+            {activeModule.toUpperCase() === 'READING' && (
+              <div className="flex items-center justify-between bg-blue-50 p-3 rounded-xl border border-blue-100">
+                <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest">One Reading Text for All Parts</span>
+                <button 
+                  onClick={() => onSingleReadingTextChange(!isSingleReadingText)}
+                  className={`w-8 h-4 rounded-full transition-all relative ${isSingleReadingText ? 'bg-blue-600' : 'bg-slate-300'}`}
+                >
+                  <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${isSingleReadingText ? 'left-[18px]' : 'left-[2px]'}`}></div>
+                </button>
+              </div>
+            )}
+
+            <div className="flex flex-col gap-2 bg-purple-50 p-3 rounded-xl border border-purple-100">
               <button 
-                onClick={onLogin}
-                className="w-full py-2 bg-orange-600 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-orange-700 transition-all shadow-md shadow-orange-200"
+                onClick={onDesignPaperClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 transition-colors group shadow-sm"
               >
-                <i className="fa-solid fa-user"></i> Login with Google
+                <span className="text-[8px] font-black text-purple-600 uppercase tracking-widest">Design Test Style</span>
+                <i className="fa-solid fa-chevron-right text-purple-400 group-hover:text-purple-600 transition-colors text-[7px]"></i>
               </button>
-            )}
-          </div>
-
-        <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-          {['GRAMMAR', 'READING', 'VOCABULARY', 'MIXED'].map(mod => (
-            <button
-              key={mod}
-              onClick={() => onModuleChange(mod.charAt(0) + mod.slice(1).toLowerCase())}
-              className={`flex-1 py-2 rounded-lg text-[8px] font-bold transition-all ${
-                activeModule.toUpperCase() === mod 
-                  ? 'bg-white text-orange-600 shadow-sm' 
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {mod}
-            </button>
-          ))}
-        </div>
-
-        {activeModule.toUpperCase() === 'READING' && (
-          <div className="flex items-center justify-between bg-blue-50 p-3 rounded-xl border border-blue-100">
-            <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest">One Reading Text for All Parts</span>
-            <button 
-              onClick={() => onSingleReadingTextChange(!isSingleReadingText)}
-              className={`w-8 h-4 rounded-full transition-all relative ${isSingleReadingText ? 'bg-blue-600' : 'bg-slate-300'}`}
-            >
-              <div className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${isSingleReadingText ? 'left-[18px]' : 'left-[2px]'}`}></div>
-            </button>
-          </div>
-        )}
-
-        <div className="flex flex-col gap-2 bg-purple-50 p-3 rounded-xl border border-purple-100">
-          <button 
-            onClick={onDesignPaperClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-purple-600 uppercase tracking-widest">Design Test Style</span>
-            <i className="fa-solid fa-chevron-right text-purple-400 group-hover:text-purple-600 transition-colors text-[7px]"></i>
-          </button>
-          <button 
-            onClick={onFormatDesignClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Format Design</span>
-            <i className="fa-solid fa-chevron-right text-orange-400 group-hover:text-orange-600 transition-colors text-[7px]"></i>
-          </button>
-
-          <button 
-            onClick={onSubjectsClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-amber-200 hover:bg-amber-100 hover:border-amber-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest">Subjects</span>
-            <i className="fa-solid fa-chevron-right text-amber-400 group-hover:text-amber-600 transition-colors text-[7px]"></i>
-          </button>
-
-          <div className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-emerald-200 shadow-sm">
-            <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest">MCQ Lines</span>
-            <div className="flex gap-1">
-              {[
-                { id: 'single', label: 'L1' },
-                { id: 'double', label: 'L2' },
-                { id: 'quad', label: 'L4' }
-              ].map((l) => (
-                <button
-                  key={l.id}
-                  onClick={() => onMCQLayoutChange(l.id as any)}
-                  className={`h-5 px-2 rounded-md text-[7px] font-black transition-all ${mcqLayout === l.id ? 'bg-emerald-600 text-white' : 'bg-slate-50 border border-emerald-100 text-emerald-400 hover:bg-emerald-50'}`}
-                >
-                  {l.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <button 
-            onClick={onPaperStyleClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-teal-200 hover:bg-teal-100 hover:border-teal-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-teal-600 uppercase tracking-widest">Paper Style</span>
-            <i className="fa-solid fa-chevron-right text-teal-400 group-hover:text-teal-600 transition-colors text-[7px]"></i>
-          </button>
-
-          <button 
-            onClick={onInstructionStylesClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-pink-200 hover:bg-pink-100 hover:border-pink-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-pink-600 uppercase tracking-widest">Instruction Styles</span>
-            <i className="fa-solid fa-chevron-right text-pink-400 group-hover:text-pink-600 transition-colors text-[7px]"></i>
-          </button>
-
-          <button 
-            onClick={onHeaderFooterDesignClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest">Header & Footer Styles</span>
-            <i className="fa-solid fa-chevron-right text-blue-400 group-hover:text-blue-600 transition-colors text-[7px]"></i>
-          </button>
-
-          <button 
-            onClick={onInstructionDesignClick}
-            className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 transition-colors group shadow-sm"
-          >
-            <span className="text-[8px] font-black text-purple-600 uppercase tracking-widest">Table design</span>
-            <i className="fa-solid fa-chevron-right text-purple-400 group-hover:text-purple-600 transition-colors text-[7px]"></i>
-          </button>
-        </div>
-
-        <div className="flex flex-col gap-2 bg-indigo-50 p-3 rounded-xl border border-indigo-100">
-          <div className="flex items-center justify-between">
-            <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest">Instruction</span>
-            <div className="flex gap-1">
-              {[
-                { id: 'uppercase', label: 'ABC' },
-                { id: 'lowercase', label: 'Abc' },
-                { id: 'random', label: 'Rand' }
-              ].map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => onInstructionCaseChange(c.id as any)}
-                  className={`h-5 px-2 rounded-full text-[7px] font-black transition-all ${instructionCase === c.id ? 'bg-indigo-600 text-white' : 'bg-white border border-indigo-200 text-indigo-400'}`}
-                >
-                  {c.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* History Section */}
-        <div className="flex-1 overflow-hidden flex flex-col">
-          <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-4 block px-1">Neural History</label>
-          <div className="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-1">
-            {(history || []).length === 0 && (
-              <div className="p-8 border-2 border-dashed border-slate-100 rounded-3xl text-center space-y-2">
-                <i className="fa-solid fa-clock-rotate-left text-slate-200 text-xl"></i>
-                <p className="text-[8px] font-bold text-slate-300 uppercase">No History Yet</p>
-              </div>
-            )}
-            {(history || []).map((item) => (
-              <div 
-                key={item.id} 
-                onClick={() => onLoadHistory(item)}
-                className="group bg-white border border-slate-100 rounded-2xl p-4 hover:border-orange-200 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+              <button 
+                onClick={onFormatDesignClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-colors group shadow-sm"
               >
-                <div className="flex flex-col gap-1">
-                  {editingHistId === item.id ? (
-                    <input 
-                      autoFocus
-                      value={tempTitle}
-                      onChange={e => setTempTitle(e.target.value)}
-                      onBlur={() => submitRename(item.id)}
-                      onKeyDown={e => e.key === 'Enter' && submitRename(item.id)}
-                      className="text-[9px] font-black text-slate-900 uppercase bg-slate-50 border-none outline-none w-full"
-                    />
-                  ) : (
-                    <span className="text-[9px] font-black text-slate-900 uppercase truncate pr-6">{item.title}</span>
-                  )}
-                  <span className="text-[7px] font-bold text-slate-400 uppercase">{new Date(item.timestamp).toLocaleDateString()}</span>
-                </div>
-                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={(e) => startRename(e, item)} className="h-6 w-6 bg-slate-50 text-slate-400 rounded-lg hover:text-orange-600"><i className="fa-solid fa-pen text-[8px]"></i></button>
-                  <button onClick={(e) => { e.stopPropagation(); onDeleteHistory(item.id); }} className="h-6 w-6 bg-slate-50 text-slate-400 rounded-lg hover:text-rose-600"><i className="fa-solid fa-trash text-[8px]"></i></button>
+                <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Format Design</span>
+                <i className="fa-solid fa-chevron-right text-orange-400 group-hover:text-orange-600 transition-colors text-[7px]"></i>
+              </button>
+
+              <button 
+                onClick={onSubjectsClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-amber-200 hover:bg-amber-100 hover:border-amber-300 transition-colors group shadow-sm"
+              >
+                <span className="text-[8px] font-black text-amber-600 uppercase tracking-widest">Subjects</span>
+                <i className="fa-solid fa-chevron-right text-amber-400 group-hover:text-amber-600 transition-colors text-[7px]"></i>
+              </button>
+
+              <div className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-emerald-200 shadow-sm">
+                <span className="text-[8px] font-black text-emerald-600 uppercase tracking-widest">MCQ Lines</span>
+                <div className="flex gap-1">
+                  {[
+                    { id: 'single', label: 'L1' },
+                    { id: 'double', label: 'L2' },
+                    { id: 'quad', label: 'L4' }
+                  ].map((l) => (
+                    <button
+                      key={l.id}
+                      onClick={() => onMCQLayoutChange(l.id as any)}
+                      className={`h-5 px-2 rounded-md text-[7px] font-black transition-all ${mcqLayout === l.id ? 'bg-emerald-600 text-white' : 'bg-slate-50 border border-emerald-100 text-emerald-400 hover:bg-emerald-50'}`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
                 </div>
               </div>
-            ))}
+
+              <button 
+                onClick={onPaperStyleClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-teal-200 hover:bg-teal-100 hover:border-teal-300 transition-colors group shadow-sm"
+              >
+                <span className="text-[8px] font-black text-teal-600 uppercase tracking-widest">Paper Style</span>
+                <i className="fa-solid fa-chevron-right text-teal-400 group-hover:text-teal-600 transition-colors text-[7px]"></i>
+              </button>
+
+              <button 
+                onClick={onInstructionStylesClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-pink-200 hover:bg-pink-100 hover:border-pink-300 transition-colors group shadow-sm"
+              >
+                <span className="text-[8px] font-black text-pink-600 uppercase tracking-widest">Instruction Styles</span>
+                <i className="fa-solid fa-chevron-right text-pink-400 group-hover:text-pink-600 transition-colors text-[7px]"></i>
+              </button>
+
+              <button 
+                onClick={onHeaderFooterDesignClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-colors group shadow-sm"
+              >
+                <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest">Header & Footer Styles</span>
+                <i className="fa-solid fa-chevron-right text-blue-400 group-hover:text-blue-600 transition-colors text-[7px]"></i>
+              </button>
+
+              <button 
+                onClick={onInstructionDesignClick}
+                className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 transition-colors group shadow-sm"
+              >
+                <span className="text-[8px] font-black text-purple-600 uppercase tracking-widest">Table design</span>
+                <i className="fa-solid fa-chevron-right text-purple-400 group-hover:text-purple-600 transition-colors text-[7px]"></i>
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-2 bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+              <div className="flex items-center justify-between">
+                <span className="text-[8px] font-black text-indigo-600 uppercase tracking-widest">Instruction</span>
+                <div className="flex gap-1">
+                  {[
+                    { id: 'uppercase', label: 'ABC' },
+                    { id: 'lowercase', label: 'Abc' },
+                    { id: 'random', label: 'Rand' }
+                  ].map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => onInstructionCaseChange(c.id as any)}
+                      className={`h-5 px-2 rounded-full text-[7px] font-black transition-all ${instructionCase === c.id ? 'bg-indigo-600 text-white' : 'bg-white border border-indigo-200 text-indigo-400'}`}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* History Section */}
+            <div className="flex flex-col">
+              <label className="text-[9px] font-black text-slate-400 uppercase tracking-[0.15em] mb-4 block px-1">Neural History</label>
+              <div className="space-y-3 pr-1">
+                {(history || []).length === 0 && (
+                  <div className="p-8 border-2 border-dashed border-slate-100 rounded-3xl text-center space-y-2">
+                    <i className="fa-solid fa-clock-rotate-left text-slate-200 text-xl"></i>
+                    <p className="text-[8px] font-bold text-slate-300 uppercase">No History Yet</p>
+                  </div>
+                )}
+                {(history || []).map((item) => (
+                  <div 
+                    key={item.id} 
+                    onClick={() => onLoadHistory(item)}
+                    className="group bg-white border border-slate-100 rounded-2xl p-4 hover:border-orange-200 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
+                  >
+                    <div className="flex flex-col gap-1">
+                      {editingHistId === item.id ? (
+                        <input 
+                          autoFocus
+                          value={tempTitle}
+                          onChange={e => setTempTitle(e.target.value)}
+                          onBlur={() => submitRename(item.id)}
+                          onKeyDown={e => e.key === 'Enter' && submitRename(item.id)}
+                          className="text-[9px] font-black text-slate-900 uppercase bg-slate-50 border-none outline-none w-full"
+                        />
+                      ) : (
+                        <span className="text-[9px] font-black text-slate-900 uppercase truncate pr-6">{item.title}</span>
+                      )}
+                      <span className="text-[7px] font-bold text-slate-400 uppercase">{new Date(item.timestamp).toLocaleDateString()}</span>
+                    </div>
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={(e) => startRename(e, item)} className="h-6 w-6 bg-slate-50 text-slate-400 rounded-lg hover:text-orange-600"><i className="fa-solid fa-pen text-[8px]"></i></button>
+                      <button onClick={(e) => { e.stopPropagation(); onDeleteHistory(item.id); }} className="h-6 w-6 bg-slate-50 text-slate-400 rounded-lg hover:text-rose-600"><i className="fa-solid fa-trash text-[8px]"></i></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="mt-auto p-6 border-t border-slate-100 space-y-4">
+        <div className="mt-auto p-6 border-t border-slate-100 space-y-4">
         <button 
           onClick={() => onToggleSettings()}
           className="w-full py-3 bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl text-[9px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
