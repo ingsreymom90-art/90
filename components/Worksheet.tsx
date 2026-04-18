@@ -77,12 +77,12 @@ const Worksheet: React.FC<WorksheetProps> = ({
           const boldElements = editorRef.current.querySelectorAll('b, strong');
           boldElements.forEach(el => {
             let text = el.textContent?.trim().toUpperCase() || '';
-            if (/^[\(\[ ]*[A-D][\)\]\. ]*$/.test(text)) {
-              const letter = text.match(/[A-D]/)?.[0];
-              if (letter) {
-                el.textContent = letter;
-                // CRITICAL: If this is inside a <td>, ensure the <td> has no border 
-                // to prevent "square on the circle" issues when AI forgets the options-table class.
+            // Aggressive cleaning for A-D letters
+            const match = text.match(/[A-D]/);
+            if (match && /^[\(\[ ]*[A-D][\)\]\. ]*$/.test(text)) {
+              el.textContent = match[0];
+              // CRITICAL: If this is inside a <td>, ensure the <td> has no border 
+              // to prevent "square on the circle" issues when AI forgets the options-table class.
                 const td = el.closest('td');
                 if (td) {
                   td.style.setProperty('border', 'none', 'important');
@@ -94,11 +94,10 @@ const Worksheet: React.FC<WorksheetProps> = ({
                   }
                 }
               }
-            }
-          });
+            });
+          }
         }
       }
-    }
   }, [content, isGenerating, placeholderHtml, mcqStyle]);
 
   const activeFontFamily = useMemo(() => {
@@ -613,25 +612,23 @@ const Worksheet: React.FC<WorksheetProps> = ({
               border: 1pt solid #059669 !important;
               color: #059669 !important;
               border-radius: 50% !important;
-            }
-            
-            /* Default if no design class matches */
+              /* Default if no design class matches */
             .worksheet-page:not([class*="design-"]) b, .worksheet-page:not([class*="design-"]) strong {
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.4em;
-              height: 1.4em;
+              width: 1.3em;
+              height: 1.3em;
               background: transparent;
               border-radius: 50% !important;
               border: 0.5pt solid #cbd5e1;
-              font-size: 0.85em;
+              font-size: 0.75em;
               color: inherit;
               font-weight: 700 !important;
               margin-right: 0.3em;
             }
           ` : ''}
-
+ 
           /* MCQ Style 2: Boxed Letters - REFINED */
           ${mcqStyle === 2 ? `
             .prose b, .prose strong {
@@ -642,9 +639,9 @@ const Worksheet: React.FC<WorksheetProps> = ({
               border-radius: 2px !important;
               background: transparent;
               color: inherit;
-              width: 1.4em;
-              height: 1.4em;
-              font-size: 0.85em;
+              width: 1.3em;
+              height: 1.3em;
+              font-size: 0.75em;
               margin-right: 0.3em;
             }
           ` : ''}

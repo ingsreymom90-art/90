@@ -306,31 +306,39 @@ export const exportToWord = (
   mcqElements.forEach(el => {
     if (mcqStyle > 0) {
       let text = el.textContent?.trim().toUpperCase() || '';
-      text = text.replace(/[\(\)\[\]\.\s]/g, '');
-      if (['A', 'B', 'C', 'D'].includes(text) && text.length === 1) {
+      // Aggressive cleaning: Find the first instance of A, B, C, or D and ignore everything else
+      const match = text.match(/[A-D]/);
+      if (match) {
+        text = match[0];
+      } else {
+        // If it's not a single A-D letter (like a word), skip styling
+        return;
+      }
+
+      if (['A', 'B', 'C', 'D'].includes(text)) {
         // Base styling for all MCQs
         if (mcqStyle !== 1 && mcqStyle !== 15) {
           (el as HTMLElement).style.display = 'inline-block';
-          (el as HTMLElement).style.width = '22pt';
-          (el as HTMLElement).style.height = '22pt';
-          (el as HTMLElement).style.lineHeight = '22pt';
+          (el as HTMLElement).style.width = '16pt';
+          (el as HTMLElement).style.height = '16pt';
+          (el as HTMLElement).style.lineHeight = '16pt';
           (el as HTMLElement).style.textAlign = 'center';
-          (el as HTMLElement).style.marginRight = '6pt';
+          (el as HTMLElement).style.marginRight = '4pt';
           (el as HTMLElement).style.fontWeight = 'bold';
-          (el as HTMLElement).style.fontSize = '10pt';
+          (el as HTMLElement).style.fontSize = '8pt';
           (el as HTMLElement).style.verticalAlign = 'middle';
           
           if (designClass === 'design-modern-blue') {
-            (el as HTMLElement).style.border = '1.5pt solid #2563eb';
+            (el as HTMLElement).style.border = '1pt solid #2563eb';
             (el as HTMLElement).style.backgroundColor = '#eff6ff';
-            (el as HTMLElement).style.borderRadius = '11pt';
+            (el as HTMLElement).style.borderRadius = '8pt';
           } else if (designClass === 'design-playful') {
-            (el as HTMLElement).style.border = '2pt solid #f97316';
+            (el as HTMLElement).style.border = '1pt solid #f97316';
             (el as HTMLElement).style.backgroundColor = '#ffedd5';
-            (el as HTMLElement).style.borderRadius = '11pt';
+            (el as HTMLElement).style.borderRadius = '8pt';
           } else {
-            (el as HTMLElement).style.border = '1pt solid black';
-            if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '11pt';
+            (el as HTMLElement).style.border = '0.75pt solid black';
+            if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '8pt';
           }
         }
 
@@ -630,8 +638,19 @@ export const exportToWord = (
     </body>
     </html>`;
 
-  const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
-  saveAs(blob, `${filename}.doc`);
+  const blob = new Blob(['\ufeff', content], { type: 'application/msword;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `${filename.replace(/[^a-z0-9]/gi, '_')}.doc`;
+  document.body.appendChild(link);
+  link.click();
+  
+  // Delay cleanup to avoid interruption
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 100);
 };
 
 export const exportToHTML = (htmlContent: string, filename: string, headerHtml: string = '') => {
