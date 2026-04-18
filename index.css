@@ -47,15 +47,20 @@ body {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
 /* MCQ Letter Refinements - DESTROY THE SQUARE ARTIFACTS */
-.options-table b, .options-table .mcq-letter {
+.options-table td > b:first-child, 
+.options-table td > strong:first-child,
+.options-table .mcq-letter {
+    all: unset !important;
+    font-family: inherit !important;
     font-size: 10pt !important;
     font-weight: 700 !important;
-    display: inline-grid !important;
-    place-items: center !important;
-    width: 17pt !important;
-    height: 17pt !important;
-    min-width: 17pt !important;
-    min-height: 17pt !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 17.5pt !important;
+    height: 17.5pt !important;
+    min-width: 17.5pt !important;
+    min-height: 17.5pt !important;
     border: 1.1pt solid #000000 !important;
     border-style: solid !important;
     border-radius: 50% !important;
@@ -66,24 +71,30 @@ body {
     color: #000000 !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    line-height: 0 !important;
+    line-height: normal !important;
     outline: none !important;
     outline: 0 !important;
     -webkit-appearance: none !important;
     appearance: none !important;
     text-decoration: none !important;
-    transform: translateY(-1.8pt) !important; /* Lift letters aggressively */
+    transform: translateY(-1.5pt) !important; /* Balanced lift */
     -webkit-print-color-adjust: exact !important;
     overflow: hidden !important;
     box-shadow: none !important;
     -webkit-tap-highlight-color: transparent !important;
     user-select: none !important;
-    -moz-user-select: none;
-    -ms-user-select: none;
     cursor: default !important;
+    position: relative !important;
+}
+
+/* Specific focus kills for Firefox and others */
+.options-table b:focus, .options-table td:focus, .options-table .mcq-letter:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }
 
 .options-table b::-moz-focus-inner,
+.options-table td::-moz-focus-inner,
 .options-table .mcq-letter::-moz-focus-inner {
     border: 0 !important;
     padding: 0 !important;

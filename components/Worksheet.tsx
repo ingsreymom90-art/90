@@ -81,19 +81,27 @@ const Worksheet: React.FC<WorksheetProps> = ({
             const match = text.match(/[A-D]/);
             if (match && /^[\(\[ ]*[A-D][\)\]\. ]*$/.test(text)) {
               el.textContent = match[0];
+              // Ensure we only mark it as an MCQ letter if it's REALLY a standalone letter option
+              el.classList.add('mcq-letter');
+              
               // CRITICAL: If this is inside a <td>, ensure the <td> has no border 
               // to prevent "square on the circle" issues when AI forgets the options-table class.
-                const td = el.closest('td');
-                if (td) {
-                  td.style.setProperty('border', 'none', 'important');
-                  
-                  // Also remove border from the whole row/table if it looks like a pure MCQ table
-                  const table = el.closest('table');
-                  if (table && !table.classList.contains('options-table')) {
+              const td = el.closest('td');
+              if (td) {
+                td.style.setProperty('border', 'none', 'important');
+                td.style.setProperty('outline', 'none', 'important');
+                
+                // Only add options-table class to tables that actually have multiple columns (likely MCQ)
+                // This prevents the answer key (usually a wide table or list) from getting circled.
+                const table = el.closest('table');
+                if (table && !table.classList.contains('options-table')) {
+                  const cols = table.querySelector('tr')?.cells.length || 0;
+                  if (cols > 1 || table.classList.contains('mcq-data-table')) {
                     table.classList.add('options-table');
                   }
                 }
               }
+            }
             });
           }
         }
@@ -166,7 +174,12 @@ const Worksheet: React.FC<WorksheetProps> = ({
             position: relative;
             z-index: 10;
             background: transparent !important;
+            outline: none !important;
+            box-shadow: none !important;
           }
+          .prose *:focus { outline: none !important; }
+          .prose * { -webkit-tap-highlight-color: transparent !important; }
+          .prose [contenteditable]:focus { outline: none !important; }
           @media (min-width: 768px) {
             .prose { padding: 0.66in 1in !important; }
           }
@@ -177,9 +190,9 @@ const Worksheet: React.FC<WorksheetProps> = ({
           .prose table table { border: none !important; margin-top: 5pt !important; width: auto !important; background: transparent !important; }
           .prose table table td { border: none !important; padding: 2pt 10pt !important; background: transparent !important; }
           .prose table table tr td:first-child { padding-left: 30pt !important; }
-          .prose .options-table { width: 100% !important; table-layout: auto !important; background: transparent !important; border-collapse: collapse !important; margin-bottom: 5pt !important; }
-          .prose .options-table td { padding: 4pt 8pt 4pt 0 !important; background: transparent !important; vertical-align: top !important; line-height: 1.2 !important; white-space: normal !important; }
-          .prose .options-table td b, .prose .options-table td strong { white-space: nowrap !important; }
+          .prose .options-table { width: 100% !important; table-layout: fixed !important; background: transparent !important; border-collapse: collapse !important; margin-bottom: 5pt !important; border: none !important; }
+          .prose .options-table td { padding: 1pt 8pt 1pt 0 !important; background: transparent !important; vertical-align: middle !important; line-height: 1.3 !important; white-space: nowrap !important; border: none !important; }
+          .prose .options-table td b, .prose .options-table td strong { white-space: nowrap !important; line-height: normal !important; }
           .prose .blank-line { border-bottom: 1pt solid black; display: inline-block; min-width: 50pt; margin: 0 5pt; }
           .prose .checkbox-box { border: 1pt solid black; width: 12pt; height: 12pt; display: inline-block; margin-right: 5pt; vertical-align: middle; }
           .prose th, .prose td { border: 1pt solid black !important; padding: 6pt !important; vertical-align: top !important; background: transparent !important; }
