@@ -57,22 +57,27 @@ body {
     height: 19pt !important;
     min-width: 19pt !important;
     min-height: 19pt !important;
-    border: 1.2pt solid black !important;
+    border: 1.1pt solid black !important;
     border-radius: 50% !important;
     margin: 0 6pt 0 0 !important;
-    background: white !important;
-    background-color: white !important;
+    background: #ffffff !important;
+    background-color: #ffffff !important;
     padding: 0 !important;
-    color: black !important;
+    color: #000000 !important;
     vertical-align: middle !important;
     box-sizing: border-box !important;
-    line-height: 1 !important;
+    line-height: normal !important;
     outline: none !important;
+    outline: 0 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
     text-decoration: none !important;
-    transform: translateY(-0.8pt) !important; /* Lift letters slightly */
-    -webkit-print-color-adjust: exact;
+    transform: translateY(-1.2pt) !important; /* Lift letters more */
+    -webkit-print-color-adjust: exact !important;
     overflow: hidden !important;
     box-shadow: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
 }
 
 .glass-panel {
@@ -182,7 +187,7 @@ body {
 
 .options-table td, [data-type="mcq-options"] td {
     border: none !important;
-    padding: 4px 8px !important;
+    padding: 2px 8px !important;
     text-align: left !important;
     vertical-align: middle !important;
     font-size: 0.95em;
