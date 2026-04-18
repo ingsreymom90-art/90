@@ -23,10 +23,13 @@ interface WorksheetProps {
   instructionRulerStyle?: number;
   instructionHeaderStyle?: number;
   zoom?: number;
+  isTopBottomLineEnabled?: boolean;
+  topBottomLineColor?: string;
 }
 
 const Worksheet: React.FC<WorksheetProps> = ({
-  content, onContentChange, isGenerating, theme, brandSettings, paperDesign, mcqStyle, instructionStyle, isColorfulBackgroundEnabled, isInstructionBackgroundEnabled, globalLayout, baseLayout, instructionRulerStyle = 0, instructionHeaderStyle = 0, zoom = 100
+  content, onContentChange, isGenerating, theme, brandSettings, paperDesign, mcqStyle, instructionStyle, isColorfulBackgroundEnabled, isInstructionBackgroundEnabled, globalLayout, baseLayout, instructionRulerStyle = 0, instructionHeaderStyle = 0, zoom = 100,
+  isTopBottomLineEnabled = false, topBottomLineColor = '#0ea5e9'
 }) => {
   const editorRef = useRef<HTMLDivElement>(null);
 
@@ -163,7 +166,10 @@ const Worksheet: React.FC<WorksheetProps> = ({
 
   return (
     <div className="flex-1 overflow-auto p-2 md:p-12 no-scrollbar bg-slate-200/50">
-      <div id="worksheet-container" className="w-full max-w-[210mm] mx-auto pb-64 shadow-2xl worksheet-paper transition-transform duration-300 ease-in-out bg-white" style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}>
+      <div id="worksheet-container" className={clsx(
+        "w-full max-w-[210mm] mx-auto pb-64 shadow-2xl worksheet-paper transition-transform duration-300 ease-in-out bg-white",
+        isInstructionBackgroundEnabled ? "instruction-bg-active" : "instruction-bg-inactive"
+      )} style={{ transform: `scale(${zoom / 100})`, transformOrigin: 'top center' }}>
         <style>{`
           * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .prose { 
@@ -177,6 +183,22 @@ const Worksheet: React.FC<WorksheetProps> = ({
             outline: none !important;
             box-shadow: none !important;
           }
+          
+          /* UNIVERSAL NO-COLOR RESET FOR INSTRUCTIONS */
+          .instruction-bg-inactive .header-row, 
+          .instruction-bg-inactive tr:first-child td[colspan],
+          .instruction-bg-inactive .part-header {
+              background-color: transparent !important;
+              background: transparent !important;
+              color: black !important;
+              border: none !important;
+              border-bottom: 2pt solid black !important;
+              border-radius: 0 !important;
+              padding: 10pt 0 !important;
+              box-shadow: none !important;
+              text-align: left !important;
+          }
+
           .prose *:focus { outline: none !important; }
           .prose * { -webkit-tap-highlight-color: transparent !important; }
           .prose [contenteditable]:focus { outline: none !important; }
@@ -199,9 +221,9 @@ const Worksheet: React.FC<WorksheetProps> = ({
           .options-table td, [data-type="mcq-options"] td { border: none !important; }
           .prose .options-table th, .prose .options-table td { border: none !important; }
           .prose .header-row, .prose tr:first-child td[colspan] {
-            background-color: #dcfce7 !important;
-            color: #064e3b !important;
-            border-left: 6pt solid #059669 !important;
+            background-color: transparent !important;
+            color: black !important;
+            border-left: none !important;
             text-align: left !important;
             padding-left: 15pt !important;
             font-weight: bold !important;
@@ -577,15 +599,16 @@ const Worksheet: React.FC<WorksheetProps> = ({
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 1.1em;
-            height: 0.5em; /* Shorter by 50% from default 1em */
-            margin-right: 0.4em;
+            min-width: 1.6em;
+            height: 1.6em;
+            margin-right: 0.6em;
             transition: all 0.2s;
             border: none;
             background: transparent;
-            font-weight: 700 !important;
-            font-size: 0.4em; /* Smaller by 20%+ */
+            font-weight: 900 !important;
+            font-size: 0.72em;
             vertical-align: middle;
+            line-height: 1;
           }
 
           /* MCQ Style 0: Standard (No special styling) */
@@ -604,18 +627,28 @@ const Worksheet: React.FC<WorksheetProps> = ({
 
           /* MCQ Style 1: Rounded Badge (Styled by Design) */
           ${mcqStyle === 1 ? `
-            .design-modern-blue b, .design-modern-blue strong { background: #eff6ff; border: 0.5pt solid #2563eb; border-radius: 50% !important; color: #1e40af; }
-            .design-classic b, .design-classic strong { background: transparent; border: 0.5pt solid black; border-radius: 50% !important; font-family: 'Georgia', serif; }
-            .design-minimalist b, .design-minimalist strong { background: #f8fafc; border: none; border-bottom: 1pt solid black; border-radius: 0 !important; }
-            .design-playful b, .design-playful strong { background: #ffedd5; border: 1pt dashed #f97316; border-radius: 50% !important; color: #9a3412; }
-            .design-professional b, .design-professional strong { background: #f1f5f9; border-left: 3pt solid #334155; border-radius: 0 !important; padding-left: 4px; width: auto; min-width: 1.8em; }
-            .design-elegant b, .design-elegant strong { background: #fef3c7; border: 0.5pt solid #92400e; border-radius: 50% 0 50% 0 !important; color: #78350f; }
-            .design-technical b, .design-technical strong { background: transparent; border: 1pt solid #0f172a; border-radius: 50% !important; color: #0f172a; font-family: 'Courier New', monospace; }
-            .design-eco b, .design-eco strong { background: transparent; border: 1pt solid #166534; border-radius: 12px 4px !important; color: #14532d; }
-            .design-contrast b, .design-contrast strong { background: transparent; border: 2pt solid black; color: black; border-radius: 0 !important; transform: rotate(-3deg); }
-            .design-two-fold b, .design-two-fold strong { background: white; border: 0.5pt solid #cbd5e1; border-radius: 50% !important; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
+            .prose b, .prose strong {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              width: 1.25em;
+              height: 1.25em;
+              font-size: 0.75em;
+              margin-right: 0.6em;
+              vertical-align: middle;
+            }
+            .design-modern-blue b, .design-modern-blue strong { background: #eff6ff; border: 1pt solid #2563eb; border-radius: 50% !important; color: #1e40af; }
+            .design-classic b, .design-classic strong { background: transparent; border: 1.2pt solid black; border-radius: 50% !important; font-family: 'Georgia', serif; }
+            .design-minimalist b, .design-minimalist strong { background: #f8fafc; border: none; border-bottom: 2pt solid black; border-radius: 0 !important; }
+            .design-playful b, .design-playful strong { background: #ffedd5; border: 1.5pt dashed #f97316; border-radius: 50% !important; color: #9a3412; }
+            .design-professional b, .design-professional strong { background: #f1f5f9; border-left: 5pt solid #334155; border-radius: 0 !important; padding-left: 8px; width: auto; min-width: 2.2em; }
+            .design-elegant b, .design-elegant strong { background: #fef3c7; border: 1pt solid #92400e; border-radius: 50% 0 50% 0 !important; color: #78350f; }
+            .design-technical b, .design-technical strong { background: transparent; border: 1.5pt solid #0f172a; border-radius: 50% !important; color: #0f172a; font-family: 'Courier New', monospace; }
+            .design-eco b, .design-eco strong { background: transparent; border: 1.5pt solid #166534; border-radius: 12px 4px !important; color: #14532d; }
+            .design-contrast b, .design-contrast strong { background: transparent; border: 2.5pt solid black; color: black; border-radius: 0 !important; transform: rotate(-3deg); }
+            .design-two-fold b, .design-two-fold strong { background: white; border: 1pt solid #cbd5e1; border-radius: 50% !important; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); }
             .design-projector b, .design-projector strong { background: white; color: black; border-radius: 50% !important; font-weight: 900 !important; }
-            .design-modern-round b, .design-modern-round strong { background: #e0e7ff; border: 1pt solid #6366f1; border-radius: 50% !important; color: #4338ca; }
+            .design-modern-round b, .design-modern-round strong { background: #e0e7ff; border: 1.5pt solid #6366f1; border-radius: 50% !important; color: #4338ca; }
             
             /* Green Circles for Notebook and Emerald Layouts */
             .layout-notebook b, .layout-notebook strong,
@@ -623,24 +656,18 @@ const Worksheet: React.FC<WorksheetProps> = ({
             .layout-mint b, .layout-mint strong,
             .layout-leaves b, .layout-leaves strong {
               background: #ecfdf5 !important;
-              border: 1pt solid #059669 !important;
+              border: 1.5pt solid #059669 !important;
               color: #059669 !important;
               border-radius: 50% !important;
-              /* Default if no design class matches */
-            .worksheet-page:not([class*="design-"]) b, .worksheet-page:not([class*="design-"]) strong {
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              width: 1.2em;
-              height: 0.6em;
-              background: transparent;
-              border-radius: 4px !important;
-              border: 0.5pt solid #cbd5e1;
-              font-size: 0.45em;
-              color: inherit;
-              font-weight: 700 !important;
-              margin-right: 0.2em;
-              vertical-align: middle;
+            }
+            /* Default if no design class matches */
+            .worksheet-paper:not([class*="design-"]) b, .worksheet-paper:not([class*="design-"]) strong {
+              width: 1.3em;
+              height: 1.3em;
+              background: #f8fafc;
+              border-radius: 50% !important;
+              border: 1pt solid #cbd5e1;
+              color: #1e293b;
             }
           ` : ''}
  
@@ -650,14 +677,14 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              border: 0.5pt solid #475569;
-              border-radius: 1px !important;
-              background: transparent;
-              color: inherit;
-              width: 1.2em;
-              height: 0.6em;
-              font-size: 0.45em;
-              margin-right: 0.2em;
+              border: 1.5pt solid #334155;
+              border-radius: 2pt !important;
+              background: #f8fafc;
+              color: #1e293b;
+              width: 1.25em;
+              height: 1.25em;
+              font-size: 0.75em;
+              margin-right: 0.6em;
               vertical-align: middle;
             }
           ` : ''}
@@ -740,14 +767,14 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.6em;
-              height: 1.6em;
+              width: 1.3em;
+              height: 1.3em;
               background-color: currentColor !important;
               color: #fff !important;
               border-radius: 50% !important;
               font-weight: bold !important;
-              font-size: 0.9em;
-              margin-right: 0.4em;
+              font-size: 0.72em;
+              margin-right: 0.6em;
             }
           ` : ''}
 
@@ -757,13 +784,13 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.6em;
-              height: 1.6em;
+              width: 1.3em;
+              height: 1.3em;
               background-color: currentColor !important;
               color: #fff !important;
               font-weight: bold !important;
-              font-size: 0.9em;
-              margin-right: 0.4em;
+              font-size: 0.72em;
+              margin-right: 0.6em;
             }
           ` : ''}
 
@@ -786,12 +813,13 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.8em;
-              height: 1.8em;
-              border: 2pt double currentColor !important;
+              width: 1.5em;
+              height: 1.5em;
+              border: 1.5pt double currentColor !important;
               border-radius: 50% !important;
-              margin-right: 0.4em;
+              margin-right: 0.6em;
               background: transparent !important;
+              font-size: 0.8em;
             }
           ` : ''}
 
@@ -801,12 +829,13 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.6em;
-              height: 1.6em;
-              border: 1.5pt dotted currentColor !important;
+              width: 1.3em;
+              height: 1.3em;
+              border: 1pt dotted currentColor !important;
               border-radius: 50% !important;
-              margin-right: 0.4em;
+              margin-right: 0.6em;
               background: transparent !important;
+              font-size: 0.72em;
             }
           ` : ''}
 
@@ -816,12 +845,13 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.6em;
-              height: 1.6em;
-              border: 2pt solid currentColor !important;
+              width: 1.3em;
+              height: 1.3em;
+              border: 1.5pt solid currentColor !important;
               border-radius: 50% !important;
-              margin-right: 0.4em;
+              margin-right: 0.6em;
               background: transparent !important;
+              font-size: 0.72em;
             }
           ` : ''}
 
@@ -831,13 +861,14 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.6em;
-              height: 1.6em;
+              width: 1.3em;
+              height: 1.3em;
               background-color: #10b981 !important;
               color: white !important;
               border-radius: 50% !important;
-              margin-right: 0.4em;
+              margin-right: 0.6em;
               font-weight: 900 !important;
+              font-size: 0.72em;
             }
           ` : ''}
 
@@ -847,53 +878,33 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 3.2em;
-              height: 3.2em;
-              border: 1.5pt solid #059669 !important;
+              width: 1.8em;
+              height: 1.8em;
+              border: 1.0pt solid #059669 !important;
               border-radius: 48% 52% 50% 45% / 52% 48% 55% 45% !important;
-              margin-right: 0.5em;
+              margin-right: 0.7em;
               background: #ecfdf5 !important;
               color: #059669 !important;
               font-weight: 900 !important;
-              box-shadow: none !important;
-              font-size: 0.9em;
+              font-size: 0.65em;
             }
           ` : ''}
 
-          /* MCQ Style 16: Shape Tester */
+          /* MCQ Style 16: PILL / TALL OVAL */
           ${mcqStyle === 16 ? `
             .prose b, .prose strong {
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              margin-right: 0.5em;
+              width: 1.0em;
+              height: 1.6em;
+              border: 1.5pt solid black !important;
+              border-radius: 50% / 30% !important;
+              margin-right: 0.7em;
               background: transparent !important;
-              color: #5b21b6 !important;
+              color: black !important;
               font-weight: 900 !important;
-              font-size: 0.85em;
-            }
-            .prose td:nth-child(1) b, .prose td:nth-child(1) strong {
-              width: 1.5em; height: 1.1em;
-              border: 1pt solid #7c3aed !important;
-              border-radius: 50% !important;
-            }
-            .prose td:nth-child(2) b, .prose td:nth-child(2) strong {
-              width: 1.1em; height: 1.5em;
-              border: 1pt solid #7c3aed !important;
-              border-radius: 50% !important;
-            }
-            .prose td:nth-child(3) b, .prose td:nth-child(3) strong {
-              width: 1.3em; height: 1.3em;
-              border: 1pt solid #7c3aed !important;
-              border-radius: 20% !important;
-            }
-            .prose td:nth-child(4) b, .prose td:nth-child(4) strong {
-              width: 1.4em; height: 1.3em;
-              border-top: 1.5pt solid #7c3aed !important;
-              border-bottom: 0.5pt solid #7c3aed !important;
-              border-left: 0.5pt solid #7c3aed !important;
-              border-right: 1.5pt solid #7c3aed !important;
-              border-radius: 40% !important;
+              font-size: 0.6em;
             }
           ` : ''}
 
@@ -1160,6 +1171,12 @@ const Worksheet: React.FC<WorksheetProps> = ({
           >
         </div>
         <div id="decorative-elements-container" className="absolute inset-0 pointer-events-none overflow-hidden">
+          {isTopBottomLineEnabled && (
+            <div 
+              className="absolute left-0 top-0 bottom-0 w-8" 
+              style={{ backgroundColor: topBottomLineColor }}
+            />
+          )}
           {decorativeElements}
         </div>
       </div>

@@ -18,90 +18,190 @@ function buildWordSafeHeader(
   paperDesign: number,
   activeRulerColor: string,
   fontFamily: string,
-  topic: string
+  topic: string,
+  globalLayout: number,
+  baseLayout: number,
+  withColor: boolean,
+  isTopBottomLineEnabled: boolean = false,
+  topBottomLineColor: string = '#0ea5e9'
 ): string {
 
   const logoHtml = logoData
     ? `<img src="${logoData}" style="width:60pt;height:auto;display:block;" />`
     : '';
 
-  // ── Style 8 (paperDesign === 8): "Modern Red" — matches your screenshot exactly ──
-  if (paperDesign === 8 || paperDesign === 18 || paperDesign === 19 || paperDesign === 20 || paperDesign === 21) {
-    const accentColor =
-      paperDesign === 8  ? '#c0392b' :  // Red
-      paperDesign === 18 ? '#16a34a' :  // Green
-      paperDesign === 19 ? '#2563eb' :  // Blue
-      paperDesign === 20 ? '#7c3aed' :  // Purple
-                           '#ea580c';   // Orange
+  const accentColors: Record<number, string> = {
+    5: '#1e293b', // Professional Navy
+    8: '#166534', // Eco Green
+    13: '#7f1d1d', // Bold Red (Maroon)
+    14: '#92400e', // Royal Gold
+    18: '#000000', // Academic Heavy
+    19: '#4338ca', // Art Deco
+    20: '#0ea5e9', // Futuristic
+  };
 
+  const accentColor = withColor ? (accentColors[paperDesign] || activeRulerColor || '#ea580c') : '#000000';
+  
+  // Derivative colors for frames (from globalLayout)
+  let topBarColor = '';
+  let leftBarColor = '';
+  
+  if (withColor) {
+    if (globalLayout === 1) { // Orange Mix
+      topBarColor = '#ea580c';
+      leftBarColor = '#059669';
+    } else if (globalLayout === 2) { // Emerald
+      topBarColor = '#059669';
+      leftBarColor = '#059669';
+    } else if (globalLayout === 3) { // Lavender
+      topBarColor = '#9333ea';
+      leftBarColor = '#9333ea';
+    } else if (globalLayout === 6) { // Sky
+      topBarColor = '#0284c7';
+      leftBarColor = '#0ea5e9';
+    } else if (globalLayout === 15) { // Deep Ocean
+      topBarColor = '#1e3a8a';
+      leftBarColor = '#3b82f6';
+    }
+    
+    // Override leftBarColor if paperDesign specifically requires it (e.g., Style 8 Eco Green)
+    if (paperDesign === 8) leftBarColor = '#059669';
+    if (paperDesign === 13) leftBarColor = '#b91c1c';
+    if (paperDesign === 20) leftBarColor = '#0ea5e9';
+  }
+
+  // Custom Red Style (Style 13) specifically for the red horizontal bar
+  const headerTopBarColor = paperDesign === 13 && withColor ? '#b91c1c' : topBarColor;
+  
+  const topBarHtml = headerTopBarColor ? `
+    <table border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%; border-collapse:collapse; margin-bottom:0pt;">
+      <tr><td style="background-color:${headerTopBarColor}; mso-shading:${headerTopBarColor}; height:12pt; font-size:1pt;">&nbsp;</td></tr>
+    </table>` : '';
+
+  // Header Style Mappings for left-bar professional headers
+  if ([3, 7].includes(paperDesign)) {
     return `
-    <!-- RED TOP BANNER -->
+    ${topBarHtml}
     <table border="0" cellspacing="0" cellpadding="0" width="100%"
-      style="width:100%; border-collapse:collapse; margin-bottom:0pt;">
+      style="width:100%; border-collapse:collapse; margin-bottom:8pt; margin-top:12pt;">
       <tr>
-        <td style="background-color:${accentColor}; mso-shading:${accentColor}; 
-                   mso-pattern:solid; height:10pt; font-size:1pt;">&nbsp;</td>
-      </tr>
-    </table>
-
-    <!-- SCHOOL NAME LEFT + STUDENT FIELDS RIGHT -->
-    <table border="0" cellspacing="0" cellpadding="0" width="100%"
-      style="width:100%; border-collapse:collapse; margin-bottom:8pt; margin-top:8pt;">
-      <tr>
-        <td style="width:60%; vertical-align:bottom; padding:8pt 4pt 4pt 0;">
+        <td style="width:15%; vertical-align:middle; text-align:left;">
           ${logoHtml}
+        </td>
+        <td style="width:50%; vertical-align:middle; padding-left:10pt; border-left:${leftBarColor ? `15pt solid ${leftBarColor}` : '15pt solid #000000'};">
           <div style="font-size:22pt; font-weight:900; color:${accentColor}; 
-                      font-family:'${fontFamily}',serif; text-transform:uppercase;
-                      line-height:1.1; margin-bottom:4pt;">
+                       font-family:'${fontFamily}'; text-transform:uppercase;
+                       line-height:1.1; margin-bottom:4pt;">
             ${schoolName}
           </div>
           <div style="font-size:9pt; color:${accentColor}; font-weight:700;
                       text-transform:uppercase; letter-spacing:2pt;">
-            ACADEMIC EVALUATION
+            ${topic ? topic.toUpperCase() : 'ACADEMIC EVALUATION'}
           </div>
         </td>
-        <td style="width:40%; vertical-align:top; padding:8pt 0 4pt 10pt; text-align:right;">
+        <td style="width:35%; vertical-align:top; padding:8pt 0 4pt 10pt; text-align:right;">
           <table border="0" cellspacing="0" cellpadding="0" style="margin-left:auto;">
             <tr>
               <td style="font-size:9pt; font-style:italic; padding-bottom:4pt; text-align:right;">
-                ${studentLabel}:
+                ${studentLabel}: ________________________
               </td>
             </tr>
-            <tr>
-              <td style="border-bottom:1pt solid #000000; width:120pt; height:12pt; 
-                         padding-bottom:6pt;">&nbsp;</td>
-            </tr>
-            <tr><td style="height:6pt;">&nbsp;</td></tr>
             <tr>
               <td style="font-size:9pt; font-style:italic; padding-bottom:4pt; text-align:right;">
-                ${classLabel}:
+                ${classLabel}: ________________________
               </td>
             </tr>
-            <tr>
-              <td style="border-bottom:1pt solid #000000; width:120pt; height:12pt; 
-                         padding-bottom:6pt;">&nbsp;</td>
-            </tr>
-            <tr><td style="height:6pt;">&nbsp;</td></tr>
             <tr>
               <td style="font-size:9pt; font-style:italic; padding-bottom:4pt; text-align:right;">
-                ${dateLabel}:
+                ${dateLabel}: ________________________
               </td>
-            </tr>
-            <tr>
-              <td style="border-bottom:1pt solid #000000; width:120pt; height:12pt; 
-                         padding-bottom:6pt;">&nbsp;</td>
             </tr>
           </table>
         </td>
       </tr>
     </table>
+    
     <!-- DIVIDER LINE -->
     <table border="0" cellspacing="0" cellpadding="0" width="100%"
-      style="width:100%; border-collapse:collapse; margin-bottom:12pt;">
+      style="width:100%; border-collapse:collapse; margin-bottom:12pt; margin-top:8pt;">
       <tr>
-        <td style="border-bottom:2pt solid ${accentColor}; 
-                   mso-border-bottom-alt:2pt solid ${accentColor}; 
+        <td style="border-bottom:1.5pt solid ${accentColor}; 
+                   mso-border-bottom-alt:1.5pt solid ${accentColor}; 
                    height:1pt; font-size:1pt;">&nbsp;</td>
+      </tr>
+    </table>`;
+  }
+
+  // ── Style 6 (paperDesign === 5): Green Nature (Boxed) ──
+  if (paperDesign === 5) {
+    return `
+    <table border="0" cellspacing="0" cellpadding="10" width="100%"
+      style="width:100%; border-collapse:collapse; border:3pt solid #16a34a; background-color:#f0fdf4; margin-bottom:12pt;">
+      <tr>
+        <td style="padding:10pt;">
+          <table border="0" cellspacing="0" cellpadding="0" width="100%" style="border-bottom:2pt solid #16a34a; padding-bottom:6pt; margin-bottom:6pt;">
+            <tr>
+              <td style="font-size:18pt; font-weight:900; color:#065f46; text-transform:uppercase;">
+                ${schoolName}
+              </td>
+              <td style="font-size:8pt; font-weight:700; color:#059669; text-align:right;">
+                ${dateLabel}: ______/______/______<br/><br/>
+                ${classLabel}: ______________________
+              </td>
+            </tr>
+          </table>
+          <div style="font-size:9pt; font-weight:700; color:#064e3b; margin-top:5pt;">
+            ${studentLabel}: __________________________________________
+          </div>
+        </td>
+      </tr>
+    </table>`;
+  }
+
+  // ── Style 9 variants (paperDesign 8, 18, 19, 20, 21): Top-bar border ──
+  if ([8, 18, 19, 20, 21].includes(paperDesign)) {
+    const styleColors: Record<number, { text: string, sub: string, border: string }> = {
+      8: { text: '#881337', sub: '#f43f5e', border: '#e11d48' },   // Modern Red (rose)
+      18: { text: '#064e3b', sub: '#10b981', border: '#059669' },  // Modern Green (emerald)
+      19: { text: '#1e3a8a', sub: '#3b82f6', border: '#2563eb' },  // Modern Blue (blue)
+      20: { text: '#581c87', sub: '#a855f7', border: '#9333ea' },  // Modern Purple (purple)
+      21: { text: '#7c2d12', sub: '#f97316', border: '#ea580c' }   // Modern Orange (orange)
+    };
+    const c = styleColors[paperDesign];
+    return `
+    <table border="0" cellspacing="0" cellpadding="0" width="100%"
+      style="width:100%; border-collapse:collapse; margin-bottom:16pt; margin-top:8pt;">
+      <tr>
+        <td style="border-top: 4pt solid ${c.border}; padding-top: 12pt; width:60%; vertical-align:top; text-align:left;">
+          ${logoHtml ? `<div style="margin-bottom:8pt;">${logoHtml}</div>` : ''}
+          <div style="font-size:24pt; font-weight:900; color:${c.text}; 
+                       font-family:'${fontFamily}'; text-transform:uppercase; line-height:1;">
+            ${schoolName}
+          </div>
+          <div style="font-size:9pt; color:${c.sub}; font-weight:700;
+                      text-transform:uppercase; letter-spacing:2pt; margin-top:6pt;">
+            ${topic ? topic.toUpperCase() : 'ACADEMIC EVALUATION'}
+          </div>
+        </td>
+        <td style="border-top: 4pt solid ${c.border}; padding-top: 12pt; width:40%; vertical-align:top; text-align:right;">
+          <table border="0" cellspacing="0" cellpadding="0" style="margin-left:auto;">
+            <tr>
+              <td style="font-size:9pt; font-style:italic; padding-bottom:6pt; color:#64748b; text-align:right;">
+                ${studentLabel}: __________________
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:9pt; font-style:italic; padding-bottom:6pt; color:#64748b; text-align:right;">
+                ${classLabel}: __________________
+              </td>
+            </tr>
+            <tr>
+              <td style="font-size:9pt; font-style:italic; padding-bottom:6pt; color:#64748b; text-align:right;">
+                ${dateLabel}: __________________
+              </td>
+            </tr>
+          </table>
+        </td>
       </tr>
     </table>`;
   }
@@ -224,6 +324,8 @@ export const exportToWord = (
   isInstructionBackgroundEnabled: boolean = false,
   isColorExportEnabled: boolean = false,
   exportTheme: number = 1,
+  isTopBottomLineEnabled: boolean = false,
+  topBottomLineColor: string = '#0ea5e9',
   // ── NEW PARAMS ──
   brandSettings?: {
     schoolName?: string;
@@ -240,6 +342,12 @@ export const exportToWord = (
 ) => {
   const tempDiv = document.createElement('div');
   tempDiv.innerHTML = htmlContent;
+
+  // UNWRAP WRAPPER DIVS IMMEDIATELY (Crucial to avoid removing the entire content during cleaning)
+  while (tempDiv.children.length === 1 && (tempDiv.firstElementChild?.tagName === 'DIV' || tempDiv.firstElementChild?.classList.contains('prose'))) {
+    const wrapper = tempDiv.firstElementChild as HTMLElement;
+    tempDiv.innerHTML = wrapper.innerHTML;
+  }
 
   const headerDiv = document.createElement('div');
   headerDiv.innerHTML = headerHtml;
@@ -263,41 +371,45 @@ export const exportToWord = (
     brandSettings?.scoreLabel || 'SCORE',
     brandSettings?.teacherLabel || 'TEACHER',
     brandSettings?.logoData,
-    paperDesignIndex || 8,                    // paperDesign
+    paperDesignIndex || 0,
     activeRulerColor,
     fontFamily,
-    topicText || ''
+    topicText || '',
+    globalLayout,
+    baseLayout,
+    isColorExportEnabled,
+    isTopBottomLineEnabled,
+    topBottomLineColor
   );
 
-  // If we have brandSettings, aggressively remove redundant headers from content
+  // If we have brandSettings, aggressively remove redundant headers and student info from content
   if (brandSettings) {
-    const headerSelectors = ['h1', 'h2', 'h3', '.school-header', '.worksheet-header', '.academic-evaluation'];
-    const schoolNamePart = (brandSettings.schoolName || 'GLOBAL').split(' ')[0].toUpperCase();
+    // 1. Remove explicit header elements
+    tempDiv.querySelectorAll('.school-header, .worksheet-header, .academic-evaluation, h1').forEach(el => el.remove());
     
-    // Find all potential headers and remove them if they overlap with professional header info
-    tempDiv.querySelectorAll(headerSelectors.join(',')).forEach(el => {
+    // 2. Remove redundant school name and student board info from the TOP part of content only
+    // To avoid removing the entire worksheet, we only target elements in the first 10-15 children.
+    const schoolNamePart = (brandSettings.schoolName || '').split(' ')[0].toUpperCase();
+    const children = Array.from(tempDiv.children);
+    const topLimit = Math.min(children.length, 12);
+    
+    for (let i = 0; i < topLimit; i++) {
+      const el = children[i];
       const text = el.textContent?.toUpperCase() || '';
-      if (
-        text.includes(schoolNamePart) || 
-        text.includes('ACADEMIC EVALUATION') || 
-        text.includes('GLOBAL EDUCATION') ||
-        (text.length > 0 && brandSettings.schoolName?.toUpperCase().includes(text))
-      ) {
-        // Also remove following elements if they look like evaluation labels or empty spacer paragraphs
-        let next = el.nextElementSibling;
-        while (next && (next.tagName === 'P' || next.tagName === 'DIV' || next.tagName.startsWith('H'))) {
-          const nextText = next.textContent?.toUpperCase() || '';
-          if (nextText.includes('ACADEMIC') || nextText.includes('EVALUATION') || nextText.trim() === '') {
-            const temp = next;
-            next = next.nextElementSibling;
-            temp.remove();
-          } else {
-            break;
-          }
-        }
+      
+      // Keywords that indicate header/student info
+      const headerKeywords = ['NAME', 'CLASS', 'DATE', 'SCORE', 'TEACHER', 'ACADEMIC EVALUATION'];
+      if (schoolNamePart.length > 2) headerKeywords.push(schoolNamePart);
+      
+      const matchCount = headerKeywords.filter(w => text.includes(w)).length;
+      const hasContentMarkers = text.includes('PART') || text.includes('EXERCISE') || text.includes('QUESTION') || text.includes('I.') || text.includes('1.');
+      
+      // If it looks like a header (contains school name or multiple student fields) 
+      // and doesn't look like actual content, remove it.
+      if ((matchCount >= 2 || (schoolNamePart && text.includes(schoolNamePart) && text.length < 100)) && !hasContentMarkers) {
         el.remove();
       }
-    });
+    }
   }
 
   // Dynamic Line Spacing Logic
@@ -329,106 +441,84 @@ export const exportToWord = (
     if (!isLogo) img.style.margin = '5px auto';
   }
 
-  // MCQ S  // Comprehensive MCQ Styles
+  // 1.5. STRICT BACKGROUND STRIPPING (Instruction Mode)
+  if (!isInstructionBackgroundEnabled) {
+    const allHeaders = tempDiv.querySelectorAll('.header-row, .part-header, .instruction-header, h2, h3');
+    allHeaders.forEach(el => {
+      const header = el as HTMLElement;
+      header.style.backgroundColor = 'transparent';
+      header.style.color = '#000000';
+      header.style.setProperty('mso-shading', 'transparent');
+      header.style.border = 'none';
+      header.style.setProperty('mso-border-alt', 'none');
+    });
+  }
+
+  // Map activeDesign ID to design classes for logic
+  const designClassMap: Record<string, string> = {
+    '1': 'design-modern-blue',
+    '2': 'design-classic',
+    '3': 'design-minimalist',
+    '8': 'design-eco'
+  };
+  const designClass = designClassMap[activeDesign] || '';
+
+  // Comprehensive MCQ Styles
   const mcqElements = tempDiv.querySelectorAll('b, strong, span');
   mcqElements.forEach(el => {
     // PROTECT ANSWER KEY: Do not circle letters in the answer key section
-    if (el.closest('.answer-key-section')) {
-      return;
-    }
+    const isAnswerKey = el.closest('.answer-key-section') || el.closest('.answer-key');
+    if (isAnswerKey) return;
 
     if (mcqStyle > 0) {
       let text = el.textContent?.trim().toUpperCase() || '';
-      // Aggressive cleaning: Find the first instance of A, B, C, or D and ignore everything else
       const match = text.match(/[A-D]/);
-      if (match) {
-        text = match[0];
-      } else {
-        // If it's not a single A-D letter (like a word), skip styling
-        return;
-      }
+      if (match) text = match[0]; else return;
 
-        if (['A', 'B', 'C', 'D'].includes(text)) {
-          // Base styling for all MCQs - Proportional sizing for Word
-          if (mcqStyle !== 1 && mcqStyle !== 15) {
-            (el as HTMLElement).style.display = 'inline-block';
-            (el as HTMLElement).style.width = '16pt';
-            (el as HTMLElement).style.height = '16pt';
-            (el as HTMLElement).style.lineHeight = '14pt';
-            (el as HTMLElement).style.textAlign = 'center';
-            (el as HTMLElement).style.marginRight = '4pt';
-            (el as HTMLElement).style.fontWeight = 'bold';
-            (el as HTMLElement).style.fontSize = '10pt';
-            (el as HTMLElement).style.verticalAlign = 'middle';
-            
-            if (designClass === 'design-modern-blue') {
-              (el as HTMLElement).style.border = '1pt solid #2563eb';
-              (el as HTMLElement).style.backgroundColor = '#eff6ff';
-              (el as HTMLElement).style.borderRadius = '8pt';
-            } else if (designClass === 'design-playful') {
-              (el as HTMLElement).style.border = '1pt solid #f97316';
-              (el as HTMLElement).style.backgroundColor = '#ffedd5';
-              (el as HTMLElement).style.borderRadius = '8pt';
-            } else {
-              (el as HTMLElement).style.border = '1pt solid black';
-              if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '8pt';
-            }
-          }
-
+      if (['A', 'B', 'C', 'D'].includes(text)) {
         let borderColor = '#000000';
-        let bgColor = '#ffffff';
         let textColor = '#000000';
+        let bgColor = '#ffffff';
         let isFilled = 'f';
-        let strokeWt = '1.1pt';
-
+        
         if (isColorExportEnabled) {
-          if (designClass === 'design-modern-blue' && (mcqStyle === 1 || mcqStyle === 15)) {
-            borderColor = '#2563eb';
-            bgColor = '#eff6ff';
-            textColor = '#2563eb';
-            isFilled = 't';
-            strokeWt = '1.1pt';
-          } else if (designClass === 'design-playful' && (mcqStyle === 1 || mcqStyle === 15)) {
-            borderColor = '#f97316';
-            bgColor = '#ffedd5';
-            textColor = '#ea580c';
-            isFilled = 't';
-            strokeWt = '1.1pt';
+          if (activeDesign === 'design-eco' && (mcqStyle === 1 || mcqStyle === 15)) {
+            borderColor = '#059669'; bgColor = '#ecfdf5'; textColor = '#065f46'; isFilled = 't';
+          } else if ((activeDesign === 'design-modern-blue' || activeDesign === 'design-bold-red') && (mcqStyle === 1 || mcqStyle === 15)) {
+            borderColor = '#2563eb'; bgColor = '#eff6ff'; textColor = '#171717'; isFilled = 't';
           }
         }
 
-          if (mcqStyle === 1 || mcqStyle === 15) {
-            if (mcqStyle === 15 && isColorExportEnabled) {
-              borderColor = '#059669';
-              bgColor = '#ecfdf5';
-              textColor = '#059669';
-              isFilled = 't';
-              strokeWt = '1.1pt';
-            }
-            let vmlFill = isFilled === 't' ? `fillcolor="${bgColor}"` : `filled="f"`;
-            let htmlBg = isFilled === 't' ? `background:${bgColor};` : 'background:#ffffff;';
-            let htmlBorder = `1.1pt solid ${borderColor}`;
-            
-            // FULL CIRCLE: 18pt x 18pt. Destroying squares with stroked="f" on textbox and explicit mso-border-alt:none.
-            // Alignment: relative top -2pt to match bullet baseline.
-            el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:18pt;height:18pt;position:relative;top:-2pt;v-text-anchor:middle;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;" stroked="f"><div style="text-align:center;font-size:10pt;color:${textColor};font-weight:bold;margin-top:0.5pt;line-height:1;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:18pt; height:18pt; border-radius:50%; ${htmlBg} color:${textColor}; font-weight:bold; font-size:10pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
-            (el as HTMLElement).style.border = 'none';
-            (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
-            (el as HTMLElement).style.backgroundColor = 'transparent';
-            (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-            (el as HTMLElement).style.marginRight = '4pt';
-            (el as HTMLElement).style.verticalAlign = 'middle';
-          }
-          else if (mcqStyle === 2) {
-            // Box style shrunken for flat look - Alignment fix: Reduced top to 1pt. 10pt font for legibility.
-            el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:18pt;height:18pt;position:relative;top:-2pt;v-text-anchor:middle;" filled="f" strokecolor="black" strokeweight="1.1pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;" stroked="f"><div style="text-align:center;font-size:10pt;color:black;font-weight:bold;margin-top:0.5pt;line-height:1;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:1.1pt solid black; width:18pt; height:18pt; color:black; font-weight:bold; font-size:10pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
-            (el as HTMLElement).style.border = 'none';
-            (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
-            (el as HTMLElement).style.backgroundColor = 'transparent';
-            (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-            (el as HTMLElement).style.marginRight = '4pt';
-            (el as HTMLElement).style.verticalAlign = 'middle';
-          }
+        if (mcqStyle === 1 || mcqStyle === 15) {
+          const vmlFillAttr = isFilled === 't' ? `filled="t" fillcolor="${bgColor}"` : 'filled="f"';
+          const htmlBgStyle = isFilled === 't' ? `background:${bgColor};` : 'background:transparent;';
+          
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:13pt;height:19pt;position:relative;top:2pt;" ${vmlFillAttr} strokecolor="${borderColor}" strokeweight="0.75pt" o:allowincell="t"><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:f;mso-direction-alt:auto;v-text-anchor:top;"><div style="text-align:center;font-size:7pt;line-height:7pt;color:${textColor};font-weight:bold;font-family:'${fontFamily}';margin:0;padding:0;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:0.75pt solid ${borderColor}; width:13pt; height:19pt; border-radius:50%; ${htmlBgStyle} color:${textColor}; font-weight:bold; font-size:7pt; box-sizing:border-box; display:inline-flex; align-items:flex-start; justify-content:center; text-align:center; vertical-align:-2pt;">${text}</span><!--<![endif]-->&nbsp;&nbsp;&nbsp;&nbsp;`;
+          (el as HTMLElement).style.border = 'none';
+          (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
+          (el as HTMLElement).style.backgroundColor = 'transparent';
+          (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
+          (el as HTMLElement).style.marginRight = '0pt';
+          (el as HTMLElement).style.verticalAlign = 'baseline';
+          (el as HTMLElement).classList.add('mcq-letter-vml');
+        }
+        else if (mcqStyle === 2) {
+          el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:13pt;height:19pt;position:relative;top:2pt;" filled="f" strokecolor="#000000" strokeweight="0.75pt" o:allowincell="t"><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:f;v-text-anchor:top;"><div style="text-align:center;font-size:7pt;line-height:7pt;color:black;font-weight:bold;font-family:'${fontFamily}';margin:0;padding:0;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.75pt solid black; width:13pt; height:19pt; color:black; font-weight:bold; font-size:7pt; box-sizing:border-box; display:inline-flex; align-items:flex-start; justify-content:center; text-align:center; vertical-align:-2pt;">${text}</span><!--<![endif]-->&nbsp;&nbsp;&nbsp;&nbsp;`;
+          (el as HTMLElement).style.border = 'none';
+          (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
+          (el as HTMLElement).style.backgroundColor = 'transparent';
+          (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
+          (el as HTMLElement).style.marginRight = '0pt';
+          (el as HTMLElement).style.verticalAlign = 'baseline';
+          (el as HTMLElement).classList.add('mcq-letter-vml');
+        }
+        else if (mcqStyle === 16) { // NEW: Pill / Tall Oval Style
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:13pt;height:21pt;position:relative;top:0.5pt;" filled="f" strokecolor="#000000" strokeweight="1pt" o:allowincell="t"><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:f;v-text-anchor:top;"><div style="text-align:center;font-size:7pt;line-height:7pt;color:black;font-weight:bold;font-family:'${fontFamily}';margin:0;padding:0;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:1pt solid black; width:13pt; height:21pt; border-radius:50% / 30%; color:black; font-weight:bold; font-size:7pt; box-sizing:border-box; display:inline-flex; align-items:flex-start; justify-content:center; text-align:center; vertical-align:-0.5pt;">${text}</span><!--<![endif]-->&nbsp;&nbsp;&nbsp;&nbsp;`;
+          (el as HTMLElement).style.border = 'none';
+          (el as HTMLElement).style.marginRight = '0pt';
+          (el as HTMLElement).style.verticalAlign = 'baseline';
+          (el as HTMLElement).classList.add('mcq-letter-vml');
+        }
         else if (mcqStyle === 6) el.innerHTML = `◆${text}`;
         else if (mcqStyle === 8) {
           el.innerHTML = text === 'A' ? 'Ⓐ' : text === 'B' ? 'Ⓑ' : text === 'C' ? 'Ⓒ' : 'Ⓓ';
@@ -438,31 +528,27 @@ export const exportToWord = (
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
         }
         else if (mcqStyle === 11 || mcqStyle === 12) {
-          // Double Circle / Dotted Circle -> Large 18pt - Vertical alignment fix.
-          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="1.5pt"' : 'dashstyle="dot" strokeweight="0.75pt"';
-          let htmlBorder = mcqStyle === 11 ? '1.5pt double black' : '0.75pt dotted black';
+          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="1pt"' : 'dashstyle="dot" strokeweight="1.2pt"';
+          let htmlBorder = mcqStyle === 11 ? '1pt solid black' : '1.2pt dotted black';
 
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:18pt;height:18pt;position:relative;top:-2pt;v-text-anchor:middle;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;" stroked="f"><div style="text-align:center;font-size:10pt;color:black;font-weight:bold;margin-top:0.5pt;line-height:1;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:18pt; height:18pt; border-radius:50%; background:transparent; color:black; font-weight:bold; font-size:10pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:15pt;height:21pt;position:relative;top:2pt;" filled="f" strokecolor="black" ${borderType} o:allowincell="t"><v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:f;v-text-anchor:top;"><div style="text-align:center;font-size:7pt;line-height:7pt;color:black;font-weight:bold;font-family:'${fontFamily}';margin:0;padding:0;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:15pt; height:21pt; border-radius:50%; background:transparent; color:black; font-weight:bold; font-size:7pt; box-sizing:border-box; display:inline-flex; align-items:flex-start; justify-content:center; text-align:center; vertical-align:-2pt;">${text}</span><!--<![endif]-->&nbsp;&nbsp;&nbsp;&nbsp;`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.marginRight = '4pt';
-          (el as HTMLElement).style.verticalAlign = 'middle';
+          (el as HTMLElement).style.marginRight = '0pt';
+          (el as HTMLElement).style.verticalAlign = 'baseline';
         }
         else if (mcqStyle === 13 || mcqStyle === 14) {
-          // Solid background circles -> use dark Unicode to avoid square background
           el.innerHTML = text === 'A' ? '🅐' : text === 'B' ? '🅑' : text === 'C' ? '🅒' : '🅓';
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          if (mcqStyle === 14) (el as HTMLElement).style.color = '#10b981'; // Playful green
-        }
-        
-        if ([8, 11, 12, 13, 14].includes(mcqStyle)) {
-          (el as HTMLElement).style.borderRadius = '11pt';
-          (el as HTMLElement).style.textAlign = 'center';
+          if (mcqStyle === 14) (el as HTMLElement).style.color = '#10b981';
+          (el as HTMLElement).innerHTML += '&nbsp;&nbsp;&nbsp;&nbsp;';
+          (el as HTMLElement).style.marginRight = '0pt';
+          (el as HTMLElement).style.verticalAlign = 'baseline';
         }
       }
     }
@@ -484,15 +570,92 @@ export const exportToWord = (
     if (styleNum > 0) el.style.setProperty('mso-border-bottom-alt', el.style.borderBottom);
   });
 
-  // Table Logic
+  // 1. TRANSFORM MCQ OPTIONS INTO WORD-SAFE LAYOUT TABLES
   const optionsTables = tempDiv.querySelectorAll('.options-table, [data-type="mcq-options"]');
   optionsTables.forEach(table => {
-    (table as HTMLElement).style.border = 'none';
-    (table as HTMLElement).style.setProperty('mso-border-alt', 'none');
-    table.querySelectorAll('td').forEach(cell => {
-      (cell as HTMLElement).style.border = 'none';
-      (cell as HTMLElement).style.setProperty('mso-border-alt', 'none');
-      (cell as HTMLElement).style.padding = '4pt 8pt';
+    const parent = table.parentElement;
+    if (!parent) return;
+
+    // We use a clean table because Word treats nested inline-blocks as vertical piles.
+    // This table is purely for structural layout (1-column, 2-column, or 4-column).
+    const legacyRow = table.querySelector('tr');
+    if (!legacyRow) return;
+    
+    const cells = Array.from(legacyRow.cells);
+    const columnCount = cells.length || 1;
+    const cellWidth = Math.floor(100 / columnCount);
+
+    const layoutTable = document.createElement('table');
+    layoutTable.setAttribute('border', '0');
+    layoutTable.setAttribute('cellspacing', '0');
+    layoutTable.setAttribute('cellpadding', '0');
+    layoutTable.style.width = '100%';
+    layoutTable.style.borderCollapse = 'collapse';
+    layoutTable.style.border = 'none';
+    layoutTable.style.setProperty('mso-border-alt', 'none');
+    layoutTable.style.setProperty('mso-table-lspace', '0pt');
+    layoutTable.style.setProperty('mso-table-rspace', '0pt');
+
+    const tr = document.createElement('tr');
+    cells.forEach(cell => {
+      const td = document.createElement('td');
+      td.style.width = `${cellWidth}%`;
+      td.style.verticalAlign = 'top';
+      td.style.padding = '4pt 2pt';
+      td.style.border = 'none';
+
+      // FIX ALIGNMENT: If the cell contains an MCQ letter, split it into a 2-col layout table
+      const mcqLetter = cell.querySelector('.mcq-letter-vml');
+      if (mcqLetter) {
+        const letterHtml = mcqLetter.outerHTML;
+        // Strip the letter from the original text
+        const remainder = cell.innerHTML.replace(letterHtml, '').trim();
+        
+        td.innerHTML = `
+          <table border="0" cellspacing="0" cellpadding="0" style="width:100%; border-collapse:collapse; border:none;">
+            <tr>
+              <td style="width:20pt; vertical-align:top; border:none; padding:0;">${letterHtml}</td>
+              <td style="vertical-align:top; border:none; padding:0 0 0 4pt;">${remainder}</td>
+            </tr>
+          </table>
+        `;
+      } else {
+        td.innerHTML = cell.innerHTML;
+      }
+      
+      tr.appendChild(td);
+    });
+    layoutTable.appendChild(tr);
+
+    table.replaceWith(layoutTable);
+  });
+
+  // Answer Key Section Cleanup
+  const answerKeySections = tempDiv.querySelectorAll('.answer-key-section, .answer-key');
+  answerKeySections.forEach(section => {
+    const el = section as HTMLElement;
+    el.style.marginTop = '20pt';
+    el.style.padding = '15pt';
+    el.style.border = `1.5pt solid ${activeRulerColor}`;
+    el.style.borderRadius = '5pt';
+    el.style.backgroundColor = '#f8fafc';
+    el.style.setProperty('mso-shading', '#f8fafc');
+    
+    const title = el.querySelector('h2');
+    if (title) {
+        title.style.marginTop = '0';
+        title.style.color = '#1e293b';
+        title.style.fontSize = '14pt';
+        title.style.borderBottom = `1pt solid ${activeRulerColor}`;
+        title.style.paddingBottom = '5pt';
+        title.style.marginBottom = '10pt';
+    }
+
+    const textEls = el.querySelectorAll('p, div, span');
+    textEls.forEach(t => {
+      (t as HTMLElement).style.fontSize = '11pt';
+      (t as HTMLElement).style.lineHeight = '1.5';
+      (t as HTMLElement).style.color = '#334155';
     });
   });
 
@@ -605,36 +768,43 @@ export const exportToWord = (
     el.style.borderRadius = '5pt';
   });
 
-  // Unwrap prose
   let sections = Array.from(tempDiv.children);
-  if (sections.length === 1 && sections[0].classList.contains('prose')) {
+  // Important: If everything is wrapped in ONE div (like .prose), unwrap it so we can loop over sections
+  if (sections.length === 1 && (sections[0].classList.contains('prose') || sections[0].tagName === 'DIV')) {
     sections = Array.from(sections[0].children);
   }
 
   let finalHtml = "";
   sections.forEach(el => {
-    finalHtml += `
+    // Only add non-empty elements
+    if (el.textContent?.trim() || el.querySelector('img') || el.querySelector('table')) {
+      finalHtml += `
       <table border="0" cellspacing="0" cellpadding="0" width="100%" style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="font-family: '${fontFamily}', serif; font-size: 12pt; line-height: ${exactLineHeight}; mso-line-height-rule: exactly;">
+          <td style="font-family: '${fontFamily}', serif; font-size: 12pt; padding-bottom: 8pt; line-height: ${exactLineHeight}; mso-line-height-rule: exactly;">
             ${(el as HTMLElement).outerHTML}
           </td>
         </tr>
       </table>`;
+    }
   });
 
   // 5. Frame Style Simulation
   const frameStyle = '';
-  const pageBorderStyle = isFrameEnabled ? `border: 3.0pt solid ${activeRulerColor}; padding: 24pt 24pt 24pt 24pt; mso-page-border-z-order: front;` : '';
+  const pageBorderStyle = isFrameEnabled ? `border: 3.0pt solid ${activeRulerColor}; padding: 24pt 24pt 24pt 24pt; mso-page-border-z-order: front; mso-page-border-surround-header:no; mso-page-border-surround-footer:no;` : '';
+  const physicalFrameSyle = isFrameEnabled ? `border: 3.0pt solid ${activeRulerColor}; mso-border-alt: 3.5pt solid ${activeRulerColor}; padding: 10pt;` : '';
 
   // Paper Styles - Moved All Borders to TD level for better Word support
   let bodyBgColor = '#ffffff';
   let paperTdStyle = '';
   
-  if (globalLayout === 1) { // Orange Mix (Green & Orange feel)
-    paperTdStyle = `border-left: 15pt solid #059669; mso-border-left-alt: 15pt solid #059669; border-top: 15pt solid #ea580c; mso-border-top-alt: 15pt solid #ea580c; border-top-left-radius: 40pt; padding-left: 20pt; padding-top: 20pt; background: #ffffff; mso-shading: windowtext 0% #ffffff;`;
+  if (globalLayout === 1 && isTopBottomLineEnabled) { // Orange Mix + Top-bottom line enabled
+    paperTdStyle = `border-top: 12pt solid #ea580c; mso-border-top-alt: 12pt solid #ea580c; border-top-left-radius: 40pt; padding-left: 20pt; padding-top: 20pt; background: #ffffff; mso-shading: windowtext 0% #ffffff;`;
+  } else if (globalLayout === 1) { // Orange Mix, default (no extra borders if top-bottom line is off)
+    paperTdStyle = `padding-left: 10pt; mso-shading: windowtext 0% #ffffff;`;
   } else if (globalLayout === 2) { // Modern Emerald
-    paperTdStyle = `background-color: #f0fdf4; border-left: 15pt solid #059669; padding-left: 15pt; mso-shading: windowtext 0% #f0fdf4;`;
+    paperTdStyle = `background-color: #f0fdf4; padding-left: 15pt; mso-shading: windowtext 0% #f0fdf4;`;
+    if (isTopBottomLineEnabled) paperTdStyle += `border-left: 12pt solid #059669; mso-border-left-alt: 12pt solid #059669;`;
     bodyBgColor = '#f0fdf4';
   } else if (globalLayout === 17) {
     paperTdStyle = `background-color: #ffffff; border-left: 4.5pt double #ef4444; padding-left: 35pt; mso-shading: windowtext 0% #ffffff;`;
@@ -660,16 +830,19 @@ export const exportToWord = (
     <body>
       <div class="Section1">
         <!-- Master Table for Paper Design -->
-        <table border="0" cellspacing="0" cellpadding="0" width="100%" style="width: 100%; border-collapse: collapse;">
-          <tr>
-          <td style="padding: 30pt; ${paperTdStyle} ${frameStyle}">
-              <div style="${globalLayout === 1 ? 'border-left: 3pt solid #059669; padding-left: 15pt; mso-border-left-alt: 3.5pt solid #059669;' : ''}">
-                ${brandSettings ? wordSafeHeader : headerDiv.innerHTML}
-                ${finalHtml}
-              </div>
-            </td>
-          </tr>
-        </table>
+    <table border="0" cellspacing="0" cellpadding="0" width="100%" style="width: 100%; border-collapse: collapse; ${physicalFrameSyle}">
+      <tr>
+        ${isTopBottomLineEnabled ? `
+        <td style="width: 10pt; background-color: ${topBottomLineColor}; mso-shading: ${topBottomLineColor}; font-size: 1pt;">&nbsp;</td>
+        ` : ''}
+        <td style="padding: 30pt; ${paperTdStyle} ${frameStyle}">
+            <div>
+              ${brandSettings ? wordSafeHeader : headerDiv.innerHTML}
+              ${finalHtml}
+            </div>
+          </td>
+      </tr>
+    </table>
       </div>
     </body>
     </html>`;

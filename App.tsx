@@ -423,7 +423,9 @@ function App() {
   const [isSettingsFullScreen, setIsSettingsFullScreen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('COMMAND');
   const [isFrameEnabled, setIsFrameEnabled] = useState(true);
-  const [enablePages, setEnablePages] = useState(false);
+  const [isTopBottomLineEnabled, setIsTopBottomLineEnabled] = useState(false);
+  const [topBottomLineColor, setTopBottomLineColor] = useState('#0ea5e9');
+  const [enablePages, setEnablePages] = useState(true);
   const [isPartBackgroundEnabled, setIsPartBackgroundEnabled] = useState(false);
   const [isInstructionBackgroundEnabled, setIsInstructionBackgroundEnabled] = useState(false);
   const [isColorfulBackgroundEnabled, setIsColorfulBackgroundEnabled] = useState(true);
@@ -442,8 +444,36 @@ function App() {
   const [defaultColumnCount, setDefaultColumnCount] = useState<number>(2); // 2 columns
   const [architectTab, setArchitectTab] = useState<'Grammar' | 'Vocabulary' | 'Reading' | 'Mixed' | 'Generals' | 'Custom'>('Grammar');
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
-  const [mcqLayout, setMcqLayout] = useState<'single' | 'double' | 'quad'>('quad'); // 1 option per line
-  const [mcqSpacing, setMcqSpacing] = useState<'none' | 'one'>('none'); // No space or one enter space
+  const [mcqLayout, setMcqLayout] = useState<'single' | 'double' | 'quad'>(
+    (localStorage.getItem('dp_mcq_layout') as any) || 'quad'
+  ); 
+  const [mcqSpacing, setMcqSpacing] = useState<'none' | 'one'>(
+    (localStorage.getItem('dp_mcq_spacing') as any) || 'none'
+  );
+  
+  const randomizeTopBottomLineColor = () => {
+    // Green and Orange shades only, sometimes lighter
+    const colors = [
+      '#059669', // Emerald 600
+      '#16a34a', // Green 600
+      '#22c55e', // Green 500
+      '#4ade80', // Green 400 (light)
+      '#86efac', // Green 300 (very light)
+      '#ea580c', // Orange 600
+      '#f97316', // Orange 500
+      '#fb923c', // Orange 400 (light)
+      '#fdba74', // Orange 300 (very light)
+      '#fed7aa'  // Orange 200 (extra light)
+    ];
+    setTopBottomLineColor(colors[Math.floor(Math.random() * colors.length)]);
+  };
+
+  const toggleTopBottomLine = () => {
+    if (!isTopBottomLineEnabled) {
+      randomizeTopBottomLineColor();
+    }
+    setIsTopBottomLineEnabled(!isTopBottomLineEnabled);
+  };
 
   useEffect(() => {
     localStorage.setItem('dp_base_layout', baseLayout.toString());
@@ -1337,7 +1367,7 @@ ${customHtml}
 - Vocabulary Indentation: For ALL standard lists (not bordered tables), you MUST use a 2-column borderless HTML table to align the definitions perfectly. Column 1: Number and Word. Column 2: Definition. Do NOT just use spaces.
 - Vocabulary Introduction: Always include a clear introduction sentence before the vocabulary list (e.g., "PART A: Study the following vocabulary words and their corresponding definitions.").
 - Global Indentation: For ALL question types, ensure the question numbers (1., 2., 3.) are perfectly aligned vertically. Use a table structure if necessary to ensure the text starts at the same horizontal position.
-- Instruction Clarity: ALL "PART X: ..." headers and instruction sentences MUST have a light background color (e.g., background: #f1f5f9) and dark text (color: #1e293b) to ensure they are perfectly clear and visible regardless of the page background. Use dark text for light backgrounds.
+- Instruction Clarity: Ensure all "PART X: ..." headers and instruction sentences are perfectly clear and visible. Use dark text for light backgrounds and light text for dark backgrounds. ${isInstructionBackgroundEnabled ? 'Apply a light background color (e.g., background: #f1f5f9) to the instruction header row.' : 'MANDATORY: DO NOT use any background colors or shading for instructions.'}
 - Circle Style: ${getStyleInstruction('circle', paperStyles.circle, paperStyles.circle === 0 ? "Standard bold text to circle." : 
                   paperStyles.circle === 1 ? "Underlined text to circle." :
                   paperStyles.circle === 2 ? "Italicized text to circle." :
@@ -1417,8 +1447,9 @@ ${customHtml}
       instructionBackgroundInstruction = `\n[INSTRUCTION HEADER STYLE - MANDATORY]: Every part header (e.g. PART A: ...) MUST be wrapped in a styling tag (like <div> or <span>) with EXACTLY this style: "${selStyle.prompt}". DO NOT use any other styles for the instruction header. 
       [SUBTLE ROTATION]: If you generate more than 3 parts, you may slightly vary the color of the background using other soft tones if the style allows, but you MUST respect the structural theme of the selected style: "${selStyle.name}".`;
     } else {
-      instructionBackgroundInstruction = `\n[STRICT NO-COLOR MODE]: You are strictly forbidden from applying any background-color, shading, or highlight to the instruction header, intros, or any other part titles. EVERYTHING MUST BE TRANSPARENT. Text color MUST be black (#000000). THIS IS A PRINTER-FRIENDLY NO-COLOR TEST.
-      - ALSO: Ensure NO colored backgrounds for any introduction text or titles.`;
+      instructionBackgroundInstruction = `\n[STRICT NO-COLOR MODE]: You are strictly forbidden from applying any background-color, shading, or highlight to the instruction header, intros, or any other part titles. EVERYTHING MUST BE TRANSPARENT (background-color: transparent !important;). Text color MUST be black (#000000). THIS IS A PRINTER-FRIENDLY NO-COLOR TEST.
+      - ALSO: Ensure NO colored backgrounds for any introduction text or titles.
+      - MANDATORY: DO NOT use the "header-row" class or any other class that might introduce a default background color.`;
     }
 
     // Randomize blank style between underscores and dots
@@ -1583,12 +1614,13 @@ ${customHtml}
 
     const selectedHeader = headerDesigns[paperDesign % headerDesigns.length];
 
-    const mcqLayoutInstruction = `[MCQ LAYOUT - ABSOLUTE MANDATORY]: For Multiple Choice Questions, you MUST format the options (A, B, C, D) using an HTML <table> with the class "options-table". 
+    const mcqLayoutInstruction = `[MCQ LAYOUT - ABSOLUTE MANDATORY]: For Multiple Choice Questions, format the options (A, B, C, D). 
+    MANDATORY: YOU MUST USE A <table> with class "options-table" for MCQ options when mcqLayout is "single", "double" or "quad".
     MANDATORY: Generate exactly 15 items for each MCQ section if possible.
     THIS RULE OVERRIDES ANY OTHER MCQ FORMATTING RULE.
-    ${mcqLayout === 'single' ? '- ONE LINE: Create a <table> with 1 row and 4 columns. Row 1: [A, B, C, D].' : 
-      mcqLayout === 'double' ? '- TWO LINES: Create a <table> with 2 rows and 2 columns. Row 1: [A, B], Row 2: [C, D]. (This ensures A and C are vertically aligned in the first column).' : 
-      '- FOUR LINES: Create a <table> with 4 rows and 1 column. Row 1: [A], Row 2: [B], Row 3: [C], Row 4: [D].'}
+    ${mcqLayout === 'single' ? '- ONE LINE: Use a <table> with 4 columns (25% width each) for MCQ options.' : 
+      mcqLayout === 'double' ? '- TWO LINES: Use a <table> with 2 columns (50% width each) for MCQ options.' : 
+      '- FOUR LINES: Use a 1-column <table> (100% width) with 4 rows for MCQ options.'}
     ${mcqStyle > 0 ? '- [STYLE]: Wrap the option letters (A, B, C, D) in <b> tags (e.g., <td><b>A</b> Option text</td>). MANDATORY: DO NOT use brackets like (A) or [A]. Just the plain letter inside the <b> tag.' : '- [STYLE]: Use plain letters (A, B, C, D) followed by a period.'}
     [INLINE ENFORCEMENT]: You MUST ensure each option (Label + Text) stays on a SINGLE LINE. DO NOT allow the text to wrap to a second line.
     
@@ -2041,9 +2073,12 @@ ${componentLogic}
       isInstructionBackgroundEnabled,
       isColorExportEnabled,
       theme,
-      brandSettings,      // ← NEW
-      paperDesign,        // ← NEW
-      topic               // ← NEW
+      isTopBottomLineEnabled,
+      topBottomLineColor,
+      // ── NEW PARAMS ──
+      brandSettings,      
+      paperDesign,        
+      topic               
     );
     
     setExportSettings(prev => ({ ...prev, showModal: false }));
@@ -2371,6 +2406,12 @@ ${componentLogic}
                       className={`px-4 lg:px-6 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 transition-all whitespace-nowrap ${isFrameEnabled ? 'bg-orange-600 text-white shadow-md' : 'text-slate-700 hover:bg-white/40'}`}
                     >
                       <i className={`fa-solid ${isFrameEnabled ? 'fa-square-check' : 'fa-square'} text-[10px]`}></i> Frame
+                    </button>
+                    <button 
+                      onClick={toggleTopBottomLine}
+                      className={`px-4 lg:px-6 py-2 rounded-lg text-[11px] font-bold flex items-center gap-2 transition-all whitespace-nowrap ${isTopBottomLineEnabled ? 'bg-blue-600 text-white shadow-md' : 'text-slate-700 hover:bg-white/40'}`}
+                    >
+                      <i className={`fa-solid ${isTopBottomLineEnabled ? 'fa-square-check' : 'fa-square'} text-[10px]`}></i> Top-bottom Line
                     </button>
                     <button 
                       onClick={() => setEnablePages(!enablePages)}
@@ -2824,6 +2865,8 @@ ${componentLogic}
               baseLayout={baseLayout}
               instructionRulerStyle={instructionRulerStyle}
               zoom={previewZoom}
+              isTopBottomLineEnabled={isTopBottomLineEnabled}
+              topBottomLineColor={topBottomLineColor}
             />
           </div>
         </section>
@@ -3456,7 +3499,7 @@ ${componentLogic}
                             { id: 13, label: 'Thick Circle', icon: 'fa-circle-notch' },
                             { id: 14, label: 'Circle Mix', icon: 'fa-palette' },
                             { id: 15, label: 'Crocodile Egg', icon: 'fa-egg' },
-                            { id: 16, label: 'Shape Tester', icon: 'fa-shapes' },
+                            { id: 16, label: 'Pill Oval', icon: 'fa-oval' },
                             { id: 8, label: 'Solid Round', icon: 'fa-circle' },
                             { id: 9, label: 'Solid Square', icon: 'fa-square' },
                             { id: 4, label: 'Underline', icon: 'fa-underline' },
@@ -3519,27 +3562,29 @@ ${componentLogic}
                               {['A', 'B', 'C', 'D'].map(opt => (
                                 <div key={opt} className="text-[7px] text-slate-500 flex items-center gap-1">
                                   <span className={
-                                    mcqStyle === 1 ? 'w-5 h-5 flex items-center justify-center rounded-full border border-slate-300 pb-2 leading-none bg-white select-none transition-none' : 
-                                    mcqStyle === 2 ? 'w-5 h-5 flex items-center justify-center border border-slate-300 pb-2 leading-none bg-white select-none transition-none' : 
+                                    mcqStyle === 1 ? 'w-4 h-4 flex items-center justify-center rounded-full border border-slate-300 pb-1.5 leading-none bg-white select-none transition-none text-[6px]' : 
+                                    mcqStyle === 2 ? 'w-4 h-4 flex items-center justify-center border border-slate-300 pb-1.5 leading-none bg-white select-none transition-none text-[6px]' : 
                                     mcqStyle === 3 ? '('+opt+')' : 
                                     mcqStyle === 4 ? 'underline' : 
                                     mcqStyle === 5 ? 'font-bold' : 
-                                    mcqStyle === 6 ? 'rotate-45 w-5 h-5 flex items-center justify-center border border-slate-300 inline-block pb-2 leading-none bg-white select-none transition-none' :
+                                    mcqStyle === 6 ? 'rotate-45 w-4 h-4 flex items-center justify-center border border-slate-300 inline-block pb-1.5 leading-none bg-white select-none transition-none text-[6px]' :
                                     mcqStyle === 7 ? '['+opt+']' :
-                                    mcqStyle === 8 ? 'w-5 h-5 flex items-center justify-center rounded-full bg-slate-900 text-white pb-2 leading-none select-none transition-none' :
-                                    mcqStyle === 9 ? 'w-5 h-5 flex items-center justify-center bg-slate-900 text-white pb-2 leading-none select-none transition-none' :
+                                    mcqStyle === 8 ? 'w-4 h-4 flex items-center justify-center rounded-full bg-slate-900 text-white pb-1.5 leading-none select-none transition-none text-[6px]' :
+                                    mcqStyle === 9 ? 'w-4 h-4 flex items-center justify-center bg-slate-900 text-white pb-1.5 leading-none select-none transition-none text-[6px]' :
                                     mcqStyle === 10 ? '(('+opt+'))' :
-                                    mcqStyle === 15 ? 'rounded-[50%_50%_50%_50%_/_60%_60%_40%_40%] border-2 border-purple-600 px-2' :
+                                    mcqStyle === 15 ? 'rounded-[50%_50%_50%_50%_/_60%_60%_40%_40%] border-2 border-emerald-600 px-1.5 text-[6px]' : 
+                                    mcqStyle === 16 ? 'border-2 border-slate-900 px-1.5 rounded-[50%_/_30%] py-0.5 scale-75 text-[5px]' :
                                     ''
                                   }>
                                     {mcqStyle === 3 ? `(${opt})` : 
                                      mcqStyle === 7 ? `[${opt}]` : 
                                      mcqStyle === 10 ? `((${opt}))` : 
                                      mcqStyle === 15 ? opt : 
+                                     mcqStyle === 16 ? opt :
                                      mcqStyle === 6 ? <span className="-rotate-45 inline-block">{opt}</span> :
-                                     ((mcqStyle === 1 || mcqStyle === 2 || mcqStyle === 8 || mcqStyle === 9) ? opt : `${opt}.`)}
+                                     ((mcqStyle === 1 || mcqStyle === 2 || mcqStyle === 8 || mcqStyle === 9 || mcqStyle === 15 || mcqStyle === 16) ? opt : `${opt}.`)}
                                   </span>
-                                  <span>Option</span>
+                                  <span className="ml-1">Option</span>
                                 </div>
                               ))}
                             </div>
@@ -5632,9 +5677,9 @@ ${componentLogic}
       )}
 
       {showSettings && (
-        <div className={`fixed inset-0 z-[250] bg-slate-950/80 backdrop-blur-2xl flex items-center justify-center ${isSettingsFullScreen ? 'p-0' : 'p-4'}`}>
-          <div className={`bg-[#f8fafc] bg-[radial-gradient(circle_at_top_right,rgba(234,88,12,0.03),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.03),transparent_40%)] overflow-hidden shadow-2xl flex flex-col border border-white/50 transition-all duration-500 ${isSettingsFullScreen ? 'w-full h-full rounded-none' : 'rounded-[48px] lg:rounded-[64px] w-full max-w-4xl h-full max-h-[75vh]'}`}>
-             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'hidden' : 'p-4 lg:p-6 pb-2'} flex justify-between items-center`}>
+        <div className={`fixed inset-0 z-[250] bg-slate-950/80 backdrop-blur-2xl flex items-start justify-center pt-8 ${isSettingsFullScreen ? 'p-0' : 'p-4'}`}>
+          <div className={`bg-[#f8fafc] bg-[radial-gradient(circle_at_top_right,rgba(234,88,12,0.03),transparent_40%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.03),transparent_40%)] overflow-hidden shadow-2xl flex flex-col border border-white/50 transition-all duration-500 ${isSettingsFullScreen ? 'w-full h-full rounded-none' : 'rounded-[48px] lg:rounded-[64px] w-full max-w-4xl h-full max-h-[85vh]'}`}>
+             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'hidden' : 'p-4 lg:p-5 pb-0'} flex justify-between items-center`}>
                <div className="flex items-center gap-4">
                  <div className="h-3 w-3 bg-orange-600 rounded-full animate-pulse"></div>
                  <h2 className="text-[11px] font-black uppercase text-slate-900 tracking-widest">Workspace Control Node</h2>
@@ -5650,7 +5695,7 @@ ${componentLogic}
                  <button onClick={() => setShowSettings(false)} className="h-10 w-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-900"><i className="fa-solid fa-xmark text-xl"></i></button>
                </div>
              </div>
-             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'fixed top-2 left-4 z-[300]' : 'px-4 lg:px-8 mb-2'}`}>
+             <div className={`${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'fixed top-2 left-4 z-[300]' : 'px-4 lg:px-8 mb-1'}`}>
                <div className={`flex bg-slate-100/70 p-1 rounded-[32px] gap-1 overflow-x-auto no-scrollbar shadow-inner ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'scale-75 origin-left opacity-50 hover:opacity-100 transition-opacity' : ''}`}>
                  {['COMMAND', 'ACCOUNT', 'ENGINE', 'BACKBONE LOGIC', 'DESIGN', 'FORMAT_DESIGN', 'BACKGROUND', 'LOGO'].map(tab => (
                    <button 
@@ -5671,7 +5716,7 @@ ${componentLogic}
                  <i className="fa-solid fa-xmark text-xl"></i>
                </button>
              )}
-             <div className={`flex-1 overflow-y-auto ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'px-2 pb-2' : 'px-4 lg:px-8 pb-8'} space-y-6 no-scrollbar`}>
+             <div className={`flex-1 overflow-y-auto ${isSettingsFullScreen && settingsTab === 'FORMAT_DESIGN' ? 'px-2 pb-2' : 'px-4 lg:px-8 pb-8'} space-y-4 no-scrollbar`}>
                 {settingsTab === 'FORMAT_DESIGN' && (
                   <div className="h-full min-h-[600px] animate-in fade-in slide-in-from-bottom-6">
                     <FormatDesignEditor 
@@ -6497,7 +6542,7 @@ ${componentLogic}
       )}
       {/* EXPORT SETTINGS MODAL */}
       {exportSettings.showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 p-6">
           <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setExportSettings(prev => ({ ...prev, showModal: false }))}></div>
           <div className="relative w-full max-w-md bg-white rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="p-10">

@@ -246,7 +246,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onFormatDesignClick}
                 className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-orange-200 hover:bg-orange-100 hover:border-orange-300 transition-colors group shadow-sm"
               >
-                <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest">Format Design</span>
+                <span className="text-[8px] font-black text-orange-600 uppercase tracking-widest">ADD NEW TYPE</span>
                 <i className="fa-solid fa-chevron-right text-orange-400 group-hover:text-orange-600 transition-colors text-[7px]"></i>
               </button>
 
@@ -297,7 +297,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onHeaderFooterDesignClick}
                 className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-colors group shadow-sm"
               >
-                <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest">Header & Footer Styles</span>
+                <span className="text-[8px] font-black text-blue-600 uppercase tracking-widest">DESIGN HEADER & FOOTER</span>
                 <i className="fa-solid fa-chevron-right text-blue-400 group-hover:text-blue-600 transition-colors text-[7px]"></i>
               </button>
 
@@ -305,7 +305,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                 onClick={onInstructionDesignClick}
                 className="w-full flex items-center justify-between bg-white p-2 rounded-lg border border-purple-200 hover:bg-purple-100 hover:border-purple-300 transition-colors group shadow-sm"
               >
-                <span className="text-[8px] font-black text-purple-600 uppercase tracking-widest">Table design</span>
+                <span className="text-[8px] font-black text-purple-600 uppercase tracking-widest">DESIGN TABLES</span>
                 <i className="fa-solid fa-chevron-right text-purple-400 group-hover:text-purple-600 transition-colors text-[7px]"></i>
               </button>
             </div>
