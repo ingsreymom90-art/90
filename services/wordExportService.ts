@@ -329,12 +329,14 @@ export const exportToWord = (
     if (!isLogo) img.style.margin = '5px auto';
   }
 
-  // MCQ Styling
-  const designClass = activeDesign || '';
-
-  // Comprehensive MCQ Styles
+  // MCQ S  // Comprehensive MCQ Styles
   const mcqElements = tempDiv.querySelectorAll('b, strong, span');
   mcqElements.forEach(el => {
+    // PROTECT ANSWER KEY: Do not circle letters in the answer key section
+    if (el.closest('.answer-key-section')) {
+      return;
+    }
+
     if (mcqStyle > 0) {
       let text = el.textContent?.trim().toUpperCase() || '';
       // Aggressive cleaning: Find the first instance of A, B, C, or D and ignore everything else
@@ -347,37 +349,37 @@ export const exportToWord = (
       }
 
         if (['A', 'B', 'C', 'D'].includes(text)) {
-          // Base styling for all MCQs - Oval proportions: 25% wider, 50% shorter top-to-bottom
+          // Base styling for all MCQs - Proportional sizing for Word
           if (mcqStyle !== 1 && mcqStyle !== 15) {
             (el as HTMLElement).style.display = 'inline-block';
-            (el as HTMLElement).style.width = '12pt';
-            (el as HTMLElement).style.height = '6pt';
-            (el as HTMLElement).style.lineHeight = 'normal';
+            (el as HTMLElement).style.width = '16pt';
+            (el as HTMLElement).style.height = '16pt';
+            (el as HTMLElement).style.lineHeight = '14pt';
             (el as HTMLElement).style.textAlign = 'center';
-            (el as HTMLElement).style.marginRight = '2pt';
+            (el as HTMLElement).style.marginRight = '4pt';
             (el as HTMLElement).style.fontWeight = 'bold';
-            (el as HTMLElement).style.fontSize = '3.5pt';
+            (el as HTMLElement).style.fontSize = '10pt';
             (el as HTMLElement).style.verticalAlign = 'middle';
             
             if (designClass === 'design-modern-blue') {
-              (el as HTMLElement).style.border = '0.5pt solid #2563eb';
+              (el as HTMLElement).style.border = '1pt solid #2563eb';
               (el as HTMLElement).style.backgroundColor = '#eff6ff';
-              (el as HTMLElement).style.borderRadius = '3pt';
+              (el as HTMLElement).style.borderRadius = '8pt';
             } else if (designClass === 'design-playful') {
-              (el as HTMLElement).style.border = '0.5pt solid #f97316';
+              (el as HTMLElement).style.border = '1pt solid #f97316';
               (el as HTMLElement).style.backgroundColor = '#ffedd5';
-              (el as HTMLElement).style.borderRadius = '3pt';
+              (el as HTMLElement).style.borderRadius = '8pt';
             } else {
-              (el as HTMLElement).style.border = '0.5pt solid black';
-              if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '3pt';
+              (el as HTMLElement).style.border = '1pt solid black';
+              if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '8pt';
             }
           }
 
-        let borderColor = 'black';
-        let bgColor = 'transparent';
-        let textColor = 'black';
+        let borderColor = '#000000';
+        let bgColor = '#ffffff';
+        let textColor = '#000000';
         let isFilled = 'f';
-        let strokeWt = '0.5pt';
+        let strokeWt = '1.1pt';
 
         if (isColorExportEnabled) {
           if (designClass === 'design-modern-blue' && (mcqStyle === 1 || mcqStyle === 15)) {
@@ -385,13 +387,13 @@ export const exportToWord = (
             bgColor = '#eff6ff';
             textColor = '#2563eb';
             isFilled = 't';
-            strokeWt = '0.75pt';
+            strokeWt = '1.1pt';
           } else if (designClass === 'design-playful' && (mcqStyle === 1 || mcqStyle === 15)) {
             borderColor = '#f97316';
             bgColor = '#ffedd5';
             textColor = '#ea580c';
             isFilled = 't';
-            strokeWt = '0.75pt';
+            strokeWt = '1.1pt';
           }
         }
 
@@ -401,32 +403,31 @@ export const exportToWord = (
               bgColor = '#ecfdf5';
               textColor = '#059669';
               isFilled = 't';
-              strokeWt = '0.75pt';
+              strokeWt = '1.1pt';
             }
             let vmlFill = isFilled === 't' ? `fillcolor="${bgColor}"` : `filled="f"`;
-            let htmlBg = isFilled === 't' ? `background:${bgColor};` : 'background:transparent;';
-            let htmlBorder = isFilled === 't' ? `0.75pt solid ${borderColor}` : `0.5pt solid black`;
+            let htmlBg = isFilled === 't' ? `background:${bgColor};` : 'background:#ffffff;';
+            let htmlBorder = `1.1pt solid ${borderColor}`;
             
-            // OVAL: 11.25pt wide, 4.5pt high. Masking "ghost squares" with filled="f" and stroked="f" on textbox.
-            // Letters shrunken to 8pt and squashed height with 0.5 line-height for "shorter" look.
-            // Alignment fix: position:relative; top:1pt.
-            el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:11.25pt;height:4.5pt;position:relative;top:1pt;v-text-anchor:middle;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:8pt;color:${textColor};font-weight:bold;margin-top:0pt;line-height:0.5;mso-line-height-rule:exactly;mso-text-raise:0pt;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:12pt; height:6pt; border-radius:3pt; ${htmlBg} color:${textColor}; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+            // FULL CIRCLE: 18pt x 18pt. Destroying squares with stroked="f" on textbox and explicit mso-border-alt:none.
+            // Alignment: relative top -2pt to match bullet baseline.
+            el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:18pt;height:18pt;position:relative;top:-2pt;v-text-anchor:middle;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;" stroked="f"><div style="text-align:center;font-size:10pt;color:${textColor};font-weight:bold;margin-top:0.5pt;line-height:1;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:18pt; height:18pt; border-radius:50%; ${htmlBg} color:${textColor}; font-weight:bold; font-size:10pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
             (el as HTMLElement).style.border = 'none';
             (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
             (el as HTMLElement).style.backgroundColor = 'transparent';
             (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-            (el as HTMLElement).style.marginRight = '2pt';
-            (el as HTMLElement).style.verticalAlign = 'baseline';
+            (el as HTMLElement).style.marginRight = '4pt';
+            (el as HTMLElement).style.verticalAlign = 'middle';
           }
           else if (mcqStyle === 2) {
-            // Box style shrunken for flat look - Alignment fix: Reduced top to 1pt. 8pt font for legibility.
-            el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:11.25pt;height:4.5pt;position:relative;top:1pt;v-text-anchor:middle;" filled="f" strokecolor="black" strokeweight="0.5pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:8pt;color:black;font-weight:bold;margin-top:0pt;line-height:0.5;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.5pt solid black; width:12pt; height:6pt; color:black; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+            // Box style shrunken for flat look - Alignment fix: Reduced top to 1pt. 10pt font for legibility.
+            el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:18pt;height:18pt;position:relative;top:-2pt;v-text-anchor:middle;" filled="f" strokecolor="black" strokeweight="1.1pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;" stroked="f"><div style="text-align:center;font-size:10pt;color:black;font-weight:bold;margin-top:0.5pt;line-height:1;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:1.1pt solid black; width:18pt; height:18pt; color:black; font-weight:bold; font-size:10pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
             (el as HTMLElement).style.border = 'none';
             (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
             (el as HTMLElement).style.backgroundColor = 'transparent';
             (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-            (el as HTMLElement).style.marginRight = '2pt';
-            (el as HTMLElement).style.verticalAlign = 'baseline';
+            (el as HTMLElement).style.marginRight = '4pt';
+            (el as HTMLElement).style.verticalAlign = 'middle';
           }
         else if (mcqStyle === 6) el.innerHTML = `◆${text}`;
         else if (mcqStyle === 8) {
@@ -437,17 +438,17 @@ export const exportToWord = (
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
         }
         else if (mcqStyle === 11 || mcqStyle === 12) {
-          // Double Circle / Dotted Circle -> Oval tiny - Alignment fix: Reduced top to 1.5pt. 8pt shrunken font.
-          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="1.2pt"' : 'dashstyle="dot" strokeweight="0.5pt"';
-          let htmlBorder = mcqStyle === 11 ? '1.2pt double black' : '0.5pt dotted black';
+          // Double Circle / Dotted Circle -> Large 18pt - Vertical alignment fix.
+          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="1.5pt"' : 'dashstyle="dot" strokeweight="0.75pt"';
+          let htmlBorder = mcqStyle === 11 ? '1.5pt double black' : '0.75pt dotted black';
 
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:11.25pt;height:4.5pt;position:relative;top:1.5pt;v-text-anchor:middle;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:8pt;color:black;font-weight:bold;margin-top:0pt;line-height:0.5;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:12pt; height:6pt; border-radius:3pt; background:transparent; color:black; font-weight:bold; font-size:4.5pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:18pt;height:18pt;position:relative;top:-2pt;v-text-anchor:middle;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;" stroked="f"><div style="text-align:center;font-size:10pt;color:black;font-weight:bold;margin-top:0.5pt;line-height:1;mso-line-height-rule:exactly;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:18pt; height:18pt; border-radius:50%; background:transparent; color:black; font-weight:bold; font-size:10pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.marginRight = '2pt';
-          (el as HTMLElement).style.verticalAlign = 'baseline';
+          (el as HTMLElement).style.marginRight = '4pt';
+          (el as HTMLElement).style.verticalAlign = 'middle';
         }
         else if (mcqStyle === 13 || mcqStyle === 14) {
           // Solid background circles -> use dark Unicode to avoid square background
