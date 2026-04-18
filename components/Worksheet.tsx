@@ -617,8 +617,8 @@ const Worksheet: React.FC<WorksheetProps> = ({
               display: inline-flex;
               align-items: center;
               justify-content: center;
-              width: 1.3em;
-              height: 1.3em;
+              width: 1.35em;
+              height: 1.35em;
               background: transparent;
               border-radius: 50% !important;
               border: 0.5pt solid #cbd5e1;
@@ -639,8 +639,8 @@ const Worksheet: React.FC<WorksheetProps> = ({
               border-radius: 2px !important;
               background: transparent;
               color: inherit;
-              width: 1.3em;
-              height: 1.3em;
+              width: 1.35em;
+              height: 1.35em;
               font-size: 0.75em;
               margin-right: 0.3em;
             }
