@@ -319,26 +319,26 @@ export const exportToWord = (
         // Base styling for all MCQs
         if (mcqStyle !== 1 && mcqStyle !== 15) {
           (el as HTMLElement).style.display = 'inline-block';
-          (el as HTMLElement).style.width = '16pt';
-          (el as HTMLElement).style.height = '16pt';
-          (el as HTMLElement).style.lineHeight = '16pt';
+          (el as HTMLElement).style.width = '12pt';
+          (el as HTMLElement).style.height = '12pt';
+          (el as HTMLElement).style.lineHeight = '12pt';
           (el as HTMLElement).style.textAlign = 'center';
-          (el as HTMLElement).style.marginRight = '4pt';
+          (el as HTMLElement).style.marginRight = '2pt';
           (el as HTMLElement).style.fontWeight = 'bold';
-          (el as HTMLElement).style.fontSize = '8pt';
+          (el as HTMLElement).style.fontSize = '5pt';
           (el as HTMLElement).style.verticalAlign = 'middle';
           
           if (designClass === 'design-modern-blue') {
-            (el as HTMLElement).style.border = '1pt solid #2563eb';
+            (el as HTMLElement).style.border = '0.5pt solid #2563eb';
             (el as HTMLElement).style.backgroundColor = '#eff6ff';
-            (el as HTMLElement).style.borderRadius = '8pt';
+            (el as HTMLElement).style.borderRadius = '6pt';
           } else if (designClass === 'design-playful') {
-            (el as HTMLElement).style.border = '1pt solid #f97316';
+            (el as HTMLElement).style.border = '0.5pt solid #f97316';
             (el as HTMLElement).style.backgroundColor = '#ffedd5';
-            (el as HTMLElement).style.borderRadius = '8pt';
+            (el as HTMLElement).style.borderRadius = '6pt';
           } else {
-            (el as HTMLElement).style.border = '0.75pt solid black';
-            if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '8pt';
+            (el as HTMLElement).style.border = '0.5pt solid black';
+            if (mcqStyle === 3) (el as HTMLElement).style.borderRadius = '6pt';
           }
         }
 
@@ -346,7 +346,7 @@ export const exportToWord = (
         let bgColor = 'transparent';
         let textColor = 'black';
         let isFilled = 'f';
-        let strokeWt = '1pt';
+        let strokeWt = '0.75pt';
 
         if (isColorExportEnabled) {
           if (designClass === 'design-modern-blue' && (mcqStyle === 1 || mcqStyle === 15)) {
@@ -354,13 +354,13 @@ export const exportToWord = (
             bgColor = '#eff6ff';
             textColor = '#2563eb';
             isFilled = 't';
-            strokeWt = '1.5pt';
+            strokeWt = '1pt';
           } else if (designClass === 'design-playful' && (mcqStyle === 1 || mcqStyle === 15)) {
             borderColor = '#f97316';
             bgColor = '#ffedd5';
             textColor = '#ea580c';
             isFilled = 't';
-            strokeWt = '1.5pt';
+            strokeWt = '1pt';
           }
         }
 
@@ -371,28 +371,28 @@ export const exportToWord = (
             bgColor = '#ecfdf5';
             textColor = '#059669';
             isFilled = 't';
-            strokeWt = '1.2pt';
+            strokeWt = '1pt';
           }
           let vmlFill = isFilled === 't' ? `fillcolor="${bgColor}"` : `filled="f"`;
           let htmlBg = isFilled === 't' ? `background:${bgColor};` : 'background:transparent;';
-          let htmlBorder = isFilled === 't' ? `1.2pt solid ${borderColor}` : `0.75pt solid black`;
+          let htmlBorder = isFilled === 't' ? `1pt solid ${borderColor}` : `0.5pt solid black`;
           
-          // Refined sizes: 30% smaller than 24pt is ~16.5pt. 25% smaller than 10pt is 7.5pt.
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:16.5pt;height:16.5pt;position:relative;margin-top:-1.5pt;v-text-anchor:middle;mso-shading:transparent;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;border-style:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:7.5pt;color:${textColor};font-weight:bold;margin-top:2.5pt;mso-shading:transparent;border:none;mso-border-alt:none;outline:none;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:17pt; height:17pt; border-radius:50%; ${htmlBg} color:${textColor}; font-weight:bold; font-size:9pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          // 50% SMALLER: 12pt circle, 5pt text. Aggressive mso-shading to hide ghost square.
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:12pt;height:12pt;position:relative;margin-top:-0.5pt;v-text-anchor:middle;mso-shading:transparent;" ${vmlFill} strokecolor="${borderColor}" strokeweight="${strokeWt}"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;mso-shading:transparent;"><div style="text-align:center;font-size:5pt;color:${textColor};font-weight:bold;margin-top:1.5pt;mso-shading:transparent;border:none;mso-border-alt:none;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:13pt; height:13pt; border-radius:50%; ${htmlBg} color:${textColor}; font-weight:bold; font-size:6pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.marginRight = '4pt';
+          (el as HTMLElement).style.marginRight = '2pt';
         }
         else if (mcqStyle === 2) {
-          // Just the letter in a box, no brackets, using VML for consistency and fixed size
-          el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:16.5pt;height:16.5pt;position:relative;margin-top:-1.5pt;v-text-anchor:middle;mso-shading:transparent;" filled="f" strokecolor="black" strokeweight="1pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;border-style:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:7.5pt;color:black;font-weight:bold;margin-top:2.5pt;mso-shading:transparent;border:none;mso-border-alt:none;outline:none;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.75pt solid black; width:17pt; height:17pt; color:black; font-weight:bold; font-size:9pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          // Just the letter in a box, no brackets, using VML for consistency and 50% size
+          el.innerHTML = `<!--[if gte vml 1]><v:rect style="width:12pt;height:12pt;position:relative;margin-top:-0.5pt;v-text-anchor:middle;mso-shading:transparent;" filled="f" strokecolor="black" strokeweight="0.75pt"><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;mso-shading:transparent;"><div style="text-align:center;font-size:5pt;color:black;font-weight:bold;margin-top:1.5pt;mso-shading:transparent;border:none;mso-border-alt:none;">${text}</div></v:textbox></v:rect><![endif]--><!--[if !mso]>--><span style="border:0.5pt solid black; width:13pt; height:13pt; color:black; font-weight:bold; font-size:6pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.marginRight = '4pt';
+          (el as HTMLElement).style.marginRight = '2pt';
         }
         else if (mcqStyle === 6) el.innerHTML = `◆${text}`;
         else if (mcqStyle === 8) {
@@ -403,16 +403,16 @@ export const exportToWord = (
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
         }
         else if (mcqStyle === 11 || mcqStyle === 12) {
-          // Double Circle / Dotted Circle -> smaller
-          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="2pt"' : 'dashstyle="dot" strokeweight="1pt"';
-          let htmlBorder = mcqStyle === 11 ? '2pt double black' : '1pt dotted black';
+          // Double Circle / Dotted Circle -> 50% smaller
+          let borderType = mcqStyle === 11 ? 'dashstyle="solid" strokeweight="1.5pt"' : 'dashstyle="dot" strokeweight="0.75pt"';
+          let htmlBorder = mcqStyle === 11 ? '1.5pt double black' : '0.5pt dotted black';
 
-          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:16.5pt;height:16.5pt;position:relative;margin-top:-1.5pt;v-text-anchor:middle;mso-shading:transparent;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;border-style:none;mso-fit-shape-to-text:t;"><div style="text-align:center;font-size:7.5pt;color:black;font-weight:bold;margin-top:2.5pt;mso-shading:transparent;border:none;mso-border-alt:none;outline:none;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:17pt; height:17pt; border-radius:50%; background:transparent; color:black; font-weight:bold; font-size:9pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
+          el.innerHTML = `<!--[if gte vml 1]><v:oval style="width:12pt;height:12pt;position:relative;margin-top:-0.5pt;v-text-anchor:middle;mso-shading:transparent;" filled="f" strokecolor="black" ${borderType}><v:textbox inset="0,0,0,0" style="mso-border-alt:none;mso-fit-shape-to-text:t;mso-shading:transparent;"><div style="text-align:center;font-size:5pt;color:black;font-weight:bold;margin-top:1.5pt;mso-shading:transparent;border:none;mso-border-alt:none;">${text}</div></v:textbox></v:oval><![endif]--><!--[if !mso]>--><span style="border:${htmlBorder}; width:13pt; height:13pt; border-radius:50%; background:transparent; color:black; font-weight:bold; font-size:6pt; display:inline-flex; align-items:center; justify-content:center; text-align:center; vertical-align:middle;">${text}</span><!--<![endif]-->`;
           (el as HTMLElement).style.border = 'none';
           (el as HTMLElement).style.setProperty('mso-border-alt', 'none');
           (el as HTMLElement).style.backgroundColor = 'transparent';
           (el as HTMLElement).style.setProperty('mso-shading', 'transparent');
-          (el as HTMLElement).style.marginRight = '4pt';
+          (el as HTMLElement).style.marginRight = '2pt';
         }
         else if (mcqStyle === 13 || mcqStyle === 14) {
           // Solid background circles -> use dark Unicode to avoid square background
